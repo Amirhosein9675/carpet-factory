@@ -3,11 +3,13 @@ from django.contrib.auth.models import User
 
 # Create your models here.
 
+
 class Service(models.Model):
-    title=models.CharField(max_length=256)
-    
+    title = models.CharField(max_length=256)
+
     def __str__(self) -> str:
         return self.title
+
 
 class Admin(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
@@ -27,13 +29,11 @@ class Worker(models.Model):
         return self.user.first_name + ' ' + self.user.last_name
 
 
-class ServiceProviders(models.Model):#pak k
+class ServiceProviders(models.Model):  # pak k
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     address = models.TextField(null=False, blank=False)
     phone_number = models.TextField(null=False, blank=False)
-    services=models.ManyToManyField(Service, blank=True,null=True)
-    
-    
+    services = models.ManyToManyField(Service, blank=True, null=True)
 
     def __str__(self) -> str:
         return self.user.first_name + ' ' + self.user.last_name
@@ -46,9 +46,20 @@ class Driver(models.Model):
 
     def __str__(self) -> str:
         return self.user.first_name + ' ' + self.user.last_name
+
+
 class CarpetFactory(models.Model):
-    title=models.CharField(max_length=256,null=False,blank=False)
-    carpet_id=models.BigIntegerField(null=False,blank=False)
-    
+    title = models.CharField(max_length=256, null=False, blank=False)
+
+    def __str__(self) -> str:
+        return self.title
+
+
+class Carpet(models.Model):
+    title = models.CharField(max_length=256, null=False, blank=False)
+    barcode = models.BigIntegerField(null=False, blank=False)
+    owner = models.ForeignKey(CarpetFactory, on_delete=models.CASCADE)
+    # status
+
     def __str__(self) -> str:
         return self.title
