@@ -4,7 +4,9 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.generics import ListAPIView
 from rest_framework import serializers
-from .serializers import RegisterUserSerializer, GetServicesSerializer,UpdateServiceProvidersSerializer
+from .serializers import RegisterUserSerializer, GetServicesSerializer, UpdateServiceProvidersSerializer
+import json
+
 
 class RegisterUser(APIView):
     def post(self, request, format=None):
@@ -101,33 +103,24 @@ class RigisterExcel(APIView):
 class GetServices(ListAPIView):
     queryset = Service.objects.all()
     serializer_class = GetServicesSerializer
-    
+
+
 class UpdateServiceProviders(APIView):
-    def post(self,request,format=None):
+    def post(self, request):
         try:
             print(request.data)
-            seria=UpdateServiceProvidersSerializer(data=request.data)
-            if seria.is_valid():
-                s_providersid=seria.data.get('s_providersid')
-                services1=seria.data.get('services1')
-            else:
-                return Response({'status': seria.errors}, status=status.HTTP_400_BAD_REQUEST)    
-            print(type(services1))
-            print(services1)
-            print(request.data)
-            #ser=ServiceProviders.objects.filter(id=s_providersid)
-            #t=Service.objects.get(id=11)
-            #print(t)
-            #for serv in ser:
-                #print(serv.services.add(t))
-            
-                
-            return Response({'status':'okk'},status=status.HTTP_200_OK)
-        
-        
+            print(request.data['id'])
+            services = json.loads(request.data['services1'])
+            print(services)
+            service_p = ServiceProviders.objects.filter(
+                id = request.data['id'])
+
+            for service in services:
+                print(service['id'])
+                t = Service.objects.get(id=service['id'])
+                for field in service_p:
+                    field.services.add(t)
+            return Response({'status': 'okk'}, status=status.HTTP_200_OK)
+
         except:
             return Response({'status': 'internal server error'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-            
-    
-    
-    

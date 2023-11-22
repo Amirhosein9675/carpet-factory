@@ -23,9 +23,9 @@ class GetServicesSerializer(serializers.ModelSerializer):
         model=Service
         fields="__all__"
 class UpdateServiceProvidersSerializer(serializers.ModelSerializer):
-    s_providersid=serializers.IntegerField(required=True, allow_null=False)
-    services1=serializers.ListField(child=serializers.IntegerField(),allow_empty=True, required=False)
+    # s_providersid=serializers.IntegerField(required=True, allow_null=False)
+    # services1=serializers.ListField(child=serializers.IntegerField(),allow_empty=True, required=False)
     
     class Meta:
         model=ServiceProviders
-        fields=("s_providersid","services1")
+        fields="__all__"

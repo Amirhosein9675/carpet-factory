@@ -27,11 +27,11 @@ class Worker(models.Model):
         return self.user.first_name + ' ' + self.user.last_name
 
 
-class ServiceProviders(models.Model):
+class ServiceProviders(models.Model):#pak k
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     address = models.TextField(null=False, blank=False)
     phone_number = models.TextField(null=False, blank=False)
-    services=models.ManyToManyField(Service)
+    services=models.ManyToManyField(Service, blank=True,null=True)
     
     
 
