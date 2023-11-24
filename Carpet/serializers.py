@@ -29,3 +29,9 @@ class UpdateServiceProvidersSerializer(serializers.ModelSerializer):
     class Meta:
         model=ServiceProviders
         fields="__all__"
+
+class GetServiceProviderSerializer(serializers.ModelSerializer):
+    
+    class Meta:
+        model=ServiceProviders
+        fields="__all__"

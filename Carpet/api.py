@@ -4,7 +4,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.generics import ListAPIView
 from rest_framework import serializers
-from .serializers import RegisterUserSerializer, GetServicesSerializer, UpdateServiceProvidersSerializer
+from .serializers import RegisterUserSerializer, GetServicesSerializer, UpdateServiceProvidersSerializer,GetServiceProviderSerializer
 import json
 
 
@@ -124,3 +124,6 @@ class UpdateServiceProviders(APIView):
 
         except:
             return Response({'status': 'internal server error'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+class GetService_provider(ListAPIView):
+    queryset = ServiceProviders.objects.all()
+    serializer_class = GetServiceProviderSerializer
