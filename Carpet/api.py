@@ -146,6 +146,11 @@ class UpdateCarpet(APIView):
     def post(self, request):
         try:
             staus_upadat = Status.objects.get(id=request.data['status_id'])
+            for item in list(request.data.keys()):
+                if item not in ['status_id','carpet_id']:
+                    return Response({'status':'bad request'},status=status.HTTP_400_BAD_REQUEST)
+            
+            
             print(request.data['status_id'])
             print(staus_upadat)
             carpet = Carpet.objects.filter(
