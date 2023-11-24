@@ -1,5 +1,5 @@
 from django.urls import path
-from .api import RegisterUser,RigisterExcel,GetServices,UpdateServiceProviders,GetService_provider
+from .api import *
 
 urlpatterns = [
 
@@ -8,6 +8,8 @@ urlpatterns = [
     path('getservice/',GetServices.as_view(),name='getservice'),
     path('getserviceprovider/',GetService_provider.as_view(),name='getserviceprovider'),
     path('updateservice/',UpdateServiceProviders.as_view(),name='updateservice'),
+    path('getcarpet/',GetCarpet.as_view(),name='getcarpet'),
+    
     
 
     

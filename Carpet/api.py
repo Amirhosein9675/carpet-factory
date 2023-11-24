@@ -4,7 +4,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.generics import ListAPIView
 from rest_framework import serializers
-from .serializers import RegisterUserSerializer, GetServicesSerializer, UpdateServiceProvidersSerializer,GetServiceProviderSerializer
+from .serializers import *
 import json
 
 
@@ -127,3 +127,7 @@ class UpdateServiceProviders(APIView):
 class GetService_provider(ListAPIView):
     queryset = ServiceProviders.objects.all()
     serializer_class = GetServiceProviderSerializer
+    
+class GetCarpet(ListAPIView):
+    queryset = Carpet.objects.all()
+    serializer_class = GetCarpetSerializer

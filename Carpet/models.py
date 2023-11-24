@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 
+
 # Create your models here.
 
 
@@ -59,7 +60,18 @@ class Carpet(models.Model):
     title = models.CharField(max_length=256, null=False, blank=False)
     barcode = models.BigIntegerField(null=False, blank=False)
     owner = models.ForeignKey(CarpetFactory, on_delete=models.CASCADE)
-    # status
+    status = models.ForeignKey(
+        'Status', on_delete=models.CASCADE, null=False, blank=False)
+    service_provider=models.OneToOneField(ServiceProviders,on_delete=models.CASCADE,null=True,blank=True)
+    
+
+    def __str__(self) -> str:
+        return self.title
+
+
+class Status(models.Model):
+    title = models.CharField(max_length=256, null=True, blank=True)
+    #is_activate = models.BooleanField(default=False)
 
     def __str__(self) -> str:
         return self.title
