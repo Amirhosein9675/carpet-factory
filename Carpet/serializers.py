@@ -95,3 +95,8 @@ class GetStatusSerializer(serializers.ModelSerializer):
     class Meta:
         model = Status
         fields = "__all__"
+class GetUserDetailSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = User
+        fields = ['id', 'username', 'first_name', 'last_name','is_active','is_active','email']

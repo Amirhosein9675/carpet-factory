@@ -159,3 +159,6 @@ class UpdateCarpet(APIView):
 
         except:
             return Response({'status': 'internal server error'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+class GetUserDetail(ListAPIView):
+    queryset = User.objects.all()
+    serializer_class = GetUserDetailSerializer
