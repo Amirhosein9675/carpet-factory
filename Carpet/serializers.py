@@ -40,17 +40,24 @@ class GetServiceProviderSerializer(serializers.ModelSerializer):
         service_obj = {}
         for service in obj.services.all():
             service_obj = {}
-
-            # data.append(service.id)
-            # data.append(service.title)
             service_obj['id'] = service.id
             service_obj['title'] = service.title
             data.append(service_obj)
-
         return data
-        # data.append(service.address)
+    def get_user(self,obj):
+        user_obj={}
+        user_obj['id']=obj.user.id
+        user_obj['first_name']=obj.user.first_name
+        user_obj['last_name']=obj.user.last_name
+        return user_obj
+    
+            
+            
+        
+
 
     services = serializers.SerializerMethodField("get_services")
+    user = serializers.SerializerMethodField("get_user")
 
     class Meta:
         model = ServiceProviders
