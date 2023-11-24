@@ -113,7 +113,7 @@ class UpdateServiceProviders(APIView):
             services = json.loads(request.data['services1'])
             print(services)
             service_p = ServiceProviders.objects.filter(
-                id = request.data['id'])
+                id=request.data['id'])
 
             for service in services:
                 print(service['id'])
@@ -124,10 +124,33 @@ class UpdateServiceProviders(APIView):
 
         except:
             return Response({'status': 'internal server error'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
 class GetService_provider(ListAPIView):
     queryset = ServiceProviders.objects.all()
     serializer_class = GetServiceProviderSerializer
-    
+
+
 class GetCarpet(ListAPIView):
     queryset = Carpet.objects.all()
     serializer_class = GetCarpetSerializer
+
+
+class GetStatus(ListAPIView):
+    queryset = Status.objects.all()
+    serializer_class = GetStatusSerializer
+
+
+class UpdateCarpet(APIView):
+
+    def post(self, request):
+        try:
+            staus_upadat = Status.objects.get(id=request.data['status_id'])
+            print(request.data['status_id'])
+            print(staus_upadat)
+            carpet = Carpet.objects.filter(
+                id=request.data['carpet_id']).update(status=staus_upadat)
+            return Response({'status': 'okk'}, status=status.HTTP_200_OK)
+
+        except:
+            return Response({'status': 'internal server error'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

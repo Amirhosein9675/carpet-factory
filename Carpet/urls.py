@@ -9,6 +9,9 @@ urlpatterns = [
     path('getserviceprovider/',GetService_provider.as_view(),name='getserviceprovider'),
     path('updateservice/',UpdateServiceProviders.as_view(),name='updateservice'),
     path('getcarpet/',GetCarpet.as_view(),name='getcarpet'),
+    path('getstatus/',GetStatus.as_view(),name='getsatus'),
+    path('updatecarpet/',UpdateCarpet.as_view(),name='updatecarpet'),
+    
     
     
 

@@ -89,3 +89,9 @@ class GetCarpetSerializer(serializers.ModelSerializer):
     class Meta:
         model = Carpet
         fields = "__all__"
+        
+class GetStatusSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Status
+        fields = "__all__"

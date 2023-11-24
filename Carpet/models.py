@@ -61,7 +61,7 @@ class Carpet(models.Model):
     barcode = models.BigIntegerField(null=False, blank=False)
     owner = models.ForeignKey(CarpetFactory, on_delete=models.CASCADE)
     status = models.ForeignKey(
-        'Status', on_delete=models.CASCADE, null=False, blank=False)
+        'Status', on_delete=models.CASCADE, null=True, blank=True)
     service_provider=models.OneToOneField(ServiceProviders,on_delete=models.CASCADE,null=True,blank=True)
     
 
