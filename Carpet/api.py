@@ -65,14 +65,14 @@ class RegisterUser(APIView):
 class RigisterExcel(APIView):
     def post(self, request, format=None):
         try:
-            import pandas as pd
+            #import pandas as pd
             import json
-            import csv
-            import os
-            ext = os.path.splitext(str(request.FILES['excel']))[1]
-            valid_extentions = ['.xlsx', '.csv']
-            if not ext.lower() in valid_extentions:
-                return Response({'status': 'The file format is not correct'}, status=status.HTTP_400_BAD_REQUEST)
+            #import csv
+            #import os
+            #ext = os.path.splitext(str(request.FILES['excel']))[1]
+            #valid_extentions = ['.xlsx', '.csv']
+            #if not ext.lower() in valid_extentions:
+                #return Response({'status': 'The file format is not correct'}, status=status.HTTP_400_BAD_REQUEST)
 
             # if ext=='.csv':
                 # dl=pd.read_csv(request.FILES['excel'])
@@ -84,16 +84,28 @@ class RigisterExcel(APIView):
                 # all.append(raw)
                 # print(all)
 
-            path_excel = request.FILES['excel']
-            df = pd.read_excel(path_excel, engine='openpyxl')
-            json_data = df.to_json(orient='records', indent=4)
-            obj = json.loads(json_data)
+            #path_excel = request.FILES['excel']
+            #df = pd.read_excel(path_excel, engine='openpyxl')
+            #json_data = df.to_json(orient='records', indent=4)
+            #obj = json.loads(json_data)
 
-            for obj_dict in obj:
-                carp_fac = CarpetFactory()
-                carp_fac.title = obj_dict.get('title')
-                carp_fac.carpet_id = obj_dict.get('carpet_id')
-                carp_fac.save()
+            #for obj_dict in obj:
+                #carp_fac = CarpetFactory()
+                #carp_fac.title = obj_dict.get('title')
+                #carp_fac.carpet_id = obj_dict.get('carpet_id')
+                #carp_fac.save()
+            #print(request.data['excel'])
+            seria= CarpetSerializer(data=request.data)
+            if seria.is_valid():
+                title=seria.data.get('title')
+                barcode=seria.data.get('barcode')
+                owner=seria.data.get('owner')
+                status=seria.data.get('status')
+                service_provider=seria.data.get('service_provider')
+            else:
+                return Response({'status': 'bad request serializer not valid'}, status=status.HTTP_400_BAD_REQUEST)
+                
+                    
             return Response({'status': 'The Excel file was saved in the database'}, status=status.HTTP_200_OK)
 
         except:

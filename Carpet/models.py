@@ -12,66 +12,67 @@ class Service(models.Model):
         return self.title
 
 
-class Admin(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
-    address = models.TextField(null=False, blank=False)
-    phone_number = models.TextField(null=False, blank=False)
+class ServiceProviders(models.Model):
+    first_name = models.CharField(max_length=256, blank=False, null=False)
+    last_name = models.CharField(max_length=256, blank=False, null=False)
+    phone_number = models.BigIntegerField(null=False, blank=False)
+    address = models.TextField(null=True, blank=True)
+    national_code = models.BigIntegerField(null=True, blank=True)
+    services = models.ManyToManyField(Service)
 
     def __str__(self) -> str:
-        return self.user.first_name + ' ' + self.user.last_name
-
-
-class Worker(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
-    address = models.TextField(null=False, blank=False)
-    phone_number = models.TextField(null=False, blank=False)
-
-    def __str__(self) -> str:
-        return self.user.first_name + ' ' + self.user.last_name
-
-
-class ServiceProviders(models.Model):  # pak k
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
-    address = models.TextField(null=False, blank=False)
-    phone_number = models.TextField(null=False, blank=False)
-    services = models.ManyToManyField(Service, blank=True, null=True)
-
-    def __str__(self) -> str:
-        return self.user.first_name + ' ' + self.user.last_name
+        return self.first_name + ' ' + self.last_name
 
 
 class Driver(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
-    address = models.TextField(null=False, blank=False)
-    phone_number = models.TextField(null=False, blank=False)
+    first_name = models.CharField(max_length=256, blank=False, null=False)
+    last_name = models.CharField(max_length=256, blank=False, null=False)
+    phone_number = models.BigIntegerField(null=False, blank=False)
+    national_code = models.BigIntegerField(null=True, blank=True)
+    car = models.CharField(max_length=256, null=True, blank=True)
+    car_number = models.CharField(max_length=256, blank=True, null=True)
 
     def __str__(self) -> str:
-        return self.user.first_name + ' ' + self.user.last_name
-
-
-class CarpetFactory(models.Model):
-    title = models.CharField(max_length=256, null=False, blank=False)
-
-    def __str__(self) -> str:
-        return self.title
+        return self.first_name + ' ' + self.last_name
 
 
 class Carpet(models.Model):
-    title = models.CharField(max_length=256, null=False, blank=False)
+    factory = models.CharField(max_length=256, null=False, blank=False)
     barcode = models.BigIntegerField(null=False, blank=False)
-    owner = models.ForeignKey(CarpetFactory, on_delete=models.CASCADE)
-    status = models.ForeignKey(
-        'Status', on_delete=models.CASCADE, null=True, blank=True)
-    service_provider=models.OneToOneField(ServiceProviders,on_delete=models.CASCADE,null=True,blank=True)
-    
+    map_code = models.CharField(max_length=256)
+    size = models.CharField(max_length=128)
+    color = models.CharField(max_length=128)
+    costumer_name = models.CharField(max_length=256, null=True, blank=True)
 
     def __str__(self) -> str:
-        return self.title
+        return self.barcode
 
 
 class Status(models.Model):
-    title = models.CharField(max_length=256, null=True, blank=True)
-    #is_activate = models.BooleanField(default=False)
+    title = models.CharField(max_length=20)
 
     def __str__(self) -> str:
         return self.title
+
+
+class Transfer(models.Model):
+    carpets = models.ManyToManyField(Carpet)
+    status = models.OneToOneField(Status, on_delete=models.CASCADE)
+    service_privider = models.ForeignKey(
+        ServiceProviders, on_delete=models.CASCADE)
+    services = models.ManyToManyField(Service)
+    worker = models.ForeignKey(User, on_delete=models.CASCADE)
+    date = models.DateTimeField(auto_now=True)
+    is_finished = models.BooleanField(default=False)
+    admin_veryfy = models.BooleanField(default=False)
+
+    def __str__(self) -> str:
+        return self.status.title
+
+    @property
+    def valid_services(self):
+        valid_services = []
+        for service in self.services:
+            if service in self.service_privider['services']:
+                valid_services.append(service)
+        return valid_services

@@ -105,3 +105,9 @@ class GetUserTokenSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields="__all__"
+class CarpetSerializer(serializers.ModelSerializer):
+    
+    class Meta:
+        model = Carpet
+        fields = "__all__"
+    

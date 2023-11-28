@@ -4,39 +4,33 @@ from .models import *
 # Register your models here.
 
 
-class Adminadmin(admin.ModelAdmin):
-    list_display = ['user']
-
-
-class WorkerAdmin(admin.ModelAdmin):
-    list_display = ['user']
-
-
-class ServiceProvidersAdmin(admin.ModelAdmin):
-    list_display = ['user']
-
-
-class DriverAdmin(admin.ModelAdmin):
-    list_display = ['user']
-
-
-class CarpetFctoryAdmin(admin.ModelAdmin):
+class ServiceAdmin(admin.ModelAdmin):
     list_display = ['title']
 
 
+class ServiceProviderAdmin(admin.ModelAdmin):
+    list_display = ['first_name', 'last_name', 'phone_number']
+
+
+class DriverAdmin(admin.ModelAdmin):
+    list_display = ['first_name', 'last_name', 'phone_number']
+
+
 class CarpetAdmin(admin.ModelAdmin):
-    list_display = ['title', 'barcode', 'owner']
+    list_display = ['factory', 'barcode', 'map_code', 'size', 'color']
 
 
 class StatusAdmin(admin.ModelAdmin):
-    list_display = ['title', 'is_activate']
+    list_display = ['title']
 
 
-admin.site.register(Admin, Adminadmin)
-admin.site.register(Worker, WorkerAdmin)
-admin.site.register(ServiceProviders, ServiceProvidersAdmin)
+class TransferAdmin(admin.ModelAdmin):
+    list_display = ['is_finished', 'admin_veryfy']
+
+
+admin.site.register(Service, ServiceAdmin)
+admin.site.register(ServiceProviders, ServiceProviderAdmin)
 admin.site.register(Driver, DriverAdmin)
-admin.site.register(CarpetFactory, CarpetFctoryAdmin)
-admin.site.register(Service)
 admin.site.register(Carpet, CarpetAdmin)
-admin.site.register(Status)
+admin.site.register(Status, StatusAdmin)
+admin.site.register(Transfer, TransferAdmin)
