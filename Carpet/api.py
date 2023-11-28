@@ -147,10 +147,9 @@ class UpdateCarpet(APIView):
         try:
             staus_upadat = Status.objects.get(id=request.data['status_id'])
             for item in list(request.data.keys()):
-                if item not in ['status_id','carpet_id']:
-                    return Response({'status':'bad request'},status=status.HTTP_400_BAD_REQUEST)
-            
-            
+                if item not in ['status_id', 'carpet_id']:
+                    return Response({'status': 'bad request'}, status=status.HTTP_400_BAD_REQUEST)
+
             print(request.data['status_id'])
             print(staus_upadat)
             carpet = Carpet.objects.filter(
@@ -159,6 +158,18 @@ class UpdateCarpet(APIView):
 
         except:
             return Response({'status': 'internal server error'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
 class GetUserDetail(ListAPIView):
     queryset = User.objects.all()
     serializer_class = GetUserDetailSerializer
+
+
+class GetUserToken(ListAPIView):
+    def get_queryset(self):
+        print(80*'-')
+        # print(self.queryset.user)
+        #print(self.queryset.auth)
+        print(80*'-')
+        return User.objects.all()
+    serializer_class = GetUserTokenSerializer

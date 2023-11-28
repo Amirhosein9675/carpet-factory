@@ -12,6 +12,8 @@ urlpatterns = [
     path('getstatus/',GetStatus.as_view(),name='getsatus'),
     path('updatecarpet/',UpdateCarpet.as_view(),name='updatecarpet'),
     path('getuser/',GetUserDetail.as_view(),name='getuserdetail'),
+    path('getusertoken/',GetUserToken.as_view(),name='getusertoken'),
+    
     
     
     

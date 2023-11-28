@@ -99,4 +99,9 @@ class GetUserDetailSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ['id', 'username', 'first_name', 'last_name','is_active','is_active','email']
+        fields = ['id', 'username', 'first_name', 'last_name','is_staff','is_active','email']
+class GetUserTokenSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = User
+        fields="__all__"
