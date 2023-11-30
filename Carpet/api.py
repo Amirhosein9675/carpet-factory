@@ -36,32 +36,6 @@ class RegisterUser(APIView):
             user_new.last_name = lastname
             user_new.is_staff = is_staff
             user_new.save()
-            # if roole == 'admin':
-            #     person = Admin()
-            #     person.user = user1
-            #     person.phone_number = p_number
-            #     person.save()
-
-            # elif roole == 'worker':
-            #     person = Worker()
-            #     person.user = user1
-            #     person.phone_number = p_number
-            #     person.save()
-
-            # elif roole == 'serviceproviders':
-            #     person = ServiceProviders()
-            #     person.user = user1
-            #     person.phone_number = p_number
-            #     person.save()
-
-            # elif roole == 'driver':
-            #     person = Driver()
-            #     person.user = user1
-            #     person.phone_number = p_number
-            #     person.save()
-
-            # else:
-            #     return Response({'status': 'The entered key is incorrect'}, status=status.HTTP_400_BAD_REQUEST)
 
             return Response({'status': 'okkk'}, status=status.HTTP_200_OK)
         except:
@@ -88,50 +62,32 @@ class CarpetDetails(APIView):
             return Response({'status': 'internal server error'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
-class RigisterExcel(APIView):
+class CarpetFromExcel(APIView):
     def post(self, request, format=None):
         try:
-            # import pandas as pd
-            import json
-            # import csv
-            # import os
-            # ext = os.path.splitext(str(request.FILES['excel']))[1]
-            # valid_extentions = ['.xlsx', '.csv']
-            # if not ext.lower() in valid_extentions:
-            # return Response({'status': 'The file format is not correct'}, status=status.HTTP_400_BAD_REQUEST)
-
-            # if ext=='.csv':
-            # dl=pd.read_csv(request.FILES['excel'])
-            # f=dl.to_json(orient='records', indent=4)
-            # obj1=json.loads(f)
-            # print(obj1)
-            # all=[]
-            # for raw in obj1:
-            # all.append(raw)
-            # print(all)
-
-            # path_excel = request.FILES['excel']
-            # df = pd.read_excel(path_excel, engine='openpyxl')
-            # json_data = df.to_json(orient='records', indent=4)
-            # obj = json.loads(json_data)
-
-            # for obj_dict in obj:
-            # carp_fac = CarpetFactory()
-            # carp_fac.title = obj_dict.get('title')
-            # carp_fac.carpet_id = obj_dict.get('carpet_id')
-            # carp_fac.save()
-            # print(request.data['excel'])
-            seria = CarpetSerializer(data=request.data)
+            for item in list(request.data.keys()):
+                if item not in ['factory', 'barcode', 'map_code', 'size', 'color', 'costumer_name']:
+                    return Response({'status': f'key {item} is wrong'}, status=status.HTTP_400_BAD_REQUEST)
+            seria = CarpetDetailSerializer(data=request.data)
             if seria.is_valid():
-                title = seria.data.get('title')
+                factory = seria.data.get('factory')
                 barcode = seria.data.get('barcode')
-                owner = seria.data.get('owner')
-                status = seria.data.get('status')
-                service_provider = seria.data.get('service_provider')
+                map_code = seria.data.get('map_code')
+                size = seria.data.get('size')
+                color = seria.data.get('color')
+                costumer_name = seria.data.get('costumer_name')
             else:
                 return Response({'status': 'bad request serializer not valid'}, status=status.HTTP_400_BAD_REQUEST)
+            carpet_new = Carpet()
+            carpet_new.factory = factory
+            carpet_new.barcode = barcode
+            carpet_new.map_code = map_code
+            carpet_new.size = size
+            carpet_new.color = color
+            carpet_new.costumer_name = costumer_name
+            carpet_new.save()
 
-            return Response({'status': 'The Excel file was saved in the database'}, status=status.HTTP_200_OK)
+            return Response({'status': 'carpet object saved successfully'}, status=status.HTTP_200_OK)
 
         except:
             return Response({'status': 'internal server error'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
