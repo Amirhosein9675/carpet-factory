@@ -1,10 +1,9 @@
 from rest_framework import serializers
 from .models import *
-from django.core.validators import int_list_validator
-from rest_framework.fields import ListField
 
 
 class RegisterUserSerializer(serializers.Serializer):
+
     username = serializers.CharField(
         required=True, max_length=128, allow_null=False, allow_blank=False)
     password = serializers.CharField(
@@ -13,24 +12,12 @@ class RegisterUserSerializer(serializers.Serializer):
         required=True, max_length=128, allow_null=False, allow_blank=False)
     lastname = serializers.CharField(
         required=True, max_length=128, allow_null=False, allow_blank=False)
-    p_number = serializers.IntegerField(required=True, allow_null=False)
-    roole = serializers.CharField(required=True, allow_null=False)
+    is_staff = serializers.BooleanField(required=True)
 
-
-class GetServicesSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = Service
-        fields = "__all__"
-
-
-class UpdateServiceProvidersSerializer(serializers.ModelSerializer):
-    # s_providersid=serializers.IntegerField(required=True, allow_null=False)
-    # services1=serializers.ListField(child=serializers.IntegerField(),allow_empty=True, required=False)
-
-    class Meta:
-        model = ServiceProviders
-        fields = "__all__"
+    # class Meta:
+    #     model = User
+    #     fields = ['username', 'password',
+    #               'first_name', 'last_name', 'is_staff']
 
 
 class GetServiceProviderSerializer(serializers.ModelSerializer):
@@ -45,15 +32,45 @@ class GetServiceProviderSerializer(serializers.ModelSerializer):
             data.append(service_obj)
         return data
 
-    def get_user(self, obj):
-        user_obj = {}
-        user_obj['id'] = obj.user.id
-        user_obj['first_name'] = obj.user.first_name
-        user_obj['last_name'] = obj.user.last_name
-        return user_obj
+    # def get_user(self, obj):
+    #     user_obj = {}
+    #     user_obj['id'] = obj.user.id
+    #     user_obj['first_name'] = obj.user.first_name
+    #     user_obj['last_name'] = obj.user.last_name
+    #     return user_obj
 
     services = serializers.SerializerMethodField("get_services")
-    user = serializers.SerializerMethodField("get_user")
+    # user = serializers.SerializerMethodField("get_user")
+
+    class Meta:
+        model = ServiceProviders
+        fields = ['first_name', 'last_name', 'services']
+
+
+class CarpetSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Carpet
+        fields = ['id', 'barcode']
+
+
+class CarpetDetailSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Carpet
+        fields = "__all__"
+
+
+class GetServicesSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Service
+        fields = "__all__"
+
+
+class UpdateServiceProvidersSerializer(serializers.ModelSerializer):
+    # s_providersid=serializers.IntegerField(required=True, allow_null=False)
+    # services1=serializers.ListField(child=serializers.IntegerField(),allow_empty=True, required=False)
 
     class Meta:
         model = ServiceProviders
@@ -89,25 +106,25 @@ class GetCarpetSerializer(serializers.ModelSerializer):
     class Meta:
         model = Carpet
         fields = "__all__"
-        
+
+
 class GetStatusSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Status
         fields = "__all__"
+
+
 class GetUserDetailSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ['id', 'username', 'first_name', 'last_name','is_staff','is_active','email']
+        fields = ['id', 'username', 'first_name',
+                  'last_name', 'is_staff', 'is_active', 'email']
+
+
 class GetUserTokenSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields="__all__"
-class CarpetSerializer(serializers.ModelSerializer):
-    
-    class Meta:
-        model = Carpet
         fields = "__all__"
-    
