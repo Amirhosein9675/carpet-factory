@@ -79,29 +79,29 @@ class UpdateServiceProvidersSerializer(serializers.ModelSerializer):
 
 class GetCarpetSerializer(serializers.ModelSerializer):
 
-    def get_owner(self, obj):
-        owner_obj = {}
-        owner_obj['id'] = obj.owner.id
-        owner_obj['title'] = obj.owner.title
-        return owner_obj
+    # def get_owner(self, obj):
+    #     owner_obj = {}
+    #     owner_obj['id'] = obj.owner.id
+    #     owner_obj['title'] = obj.owner.title
+    #     return owner_obj
 
-    def get_status(self, obj):
-        status_obj = {}
-        status_obj['id'] = obj.status.id
-        status_obj['title'] = obj.status.title
-        return status_obj
+    # def get_status(self, obj):
+    #     status_obj = {}
+    #     status_obj['id'] = obj.status.id
+    #     status_obj['title'] = obj.status.title
+    #     return status_obj
 
-    def get_service_provider(self, obj):
-        service_provider_obj = {}
-        service_provider_obj['id'] = obj.service_provider.user.id
-        service_provider_obj['first_name'] = obj.service_provider.user.first_name
-        service_provider_obj['last_name'] = obj.service_provider.user.last_name
-        return service_provider_obj
+    # def get_service_provider(self, obj):
+    #     service_provider_obj = {}
+    #     service_provider_obj['id'] = obj.service_provider.user.id
+    #     service_provider_obj['first_name'] = obj.service_provider.user.first_name
+    #     service_provider_obj['last_name'] = obj.service_provider.user.last_name
+    #     return service_provider_obj
 
-    owner = serializers.SerializerMethodField("get_owner")
-    status = serializers.SerializerMethodField("get_status")
-    service_provider = serializers.SerializerMethodField(
-        "get_service_provider")
+    # owner = serializers.SerializerMethodField("get_owner")
+    # status = serializers.SerializerMethodField("get_status")
+    # service_provider = serializers.SerializerMethodField(
+    #     "get_service_provider")
 
     class Meta:
         model = Carpet
