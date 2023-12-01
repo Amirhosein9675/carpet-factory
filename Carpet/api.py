@@ -98,7 +98,7 @@ class PostTransfer(APIView):
     def post(self, request, format=None):
         try:
             for item in list(request.data.keys()):
-                if item not in ['carpet', 'status', 'service_provider', 'service', 'worker', 'date', 'is_finished', 'admin_verify']:
+                if item not in ['carpet', 'status', 'service_provider', 'services', 'worker', 'date', 'is_finished', 'admin_verify']:
                     return Response({'status': f'key {item} is wrong'}, status=status.HTTP_400_BAD_REQUEST)
 
         
@@ -114,9 +114,10 @@ class PostTransfer(APIView):
             carpet=Carpet.objects.get(barcode=carpet_barcode)
             trans.carpets.add(carpet)
                 
-            services=request.data['service']
-            service=Service.objects.get(id=services)
-            trans.services.add(service)            
+            list_services=request.data['services']
+            for services_item in list_services:
+                service=Service.objects.get(id=services_item)
+                trans.services.add(service)            
 
 
             return Response({'status': 'ok'}, status=status.HTTP_200_OK)
