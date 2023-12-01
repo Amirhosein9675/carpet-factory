@@ -6,6 +6,7 @@ from rest_framework.generics import ListAPIView
 from rest_framework import serializers
 from .serializers import *
 import json
+from datetime import datetime
 
 
 class RegisterUser(APIView):
@@ -89,6 +90,38 @@ class CarpetFromExcel(APIView):
 
             return Response({'status': 'carpet object saved successfully'}, status=status.HTTP_200_OK)
 
+        except:
+            return Response({'status': 'internal server error'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class PostTransfer(APIView):
+    def post(self, request, format=None):
+        try:
+            for item in list(request.data.keys()):
+                if item not in ['carpets', 'status', 'service_provider', 'services', 'worker', 'date', 'is_finished', 'admin_verify']:
+                    return Response({'status': f'key {item} is wrong'}, status=status.HTTP_400_BAD_REQUEST)
+
+        
+            worker = User.objects.get(id=request.data['worker'])
+            service_provider = ServiceProviders.objects.get(id=request.data['service_provider'])
+            date_string_2 = request.data['date']
+            format_2 = "%Y/%m/%d %H:%M:%S"
+            date_2 = datetime.strptime(date_string_2, format_2)
+            trans = Transfer(worker=worker, service_provider=service_provider, date=date_2)
+            trans.save()
+
+            list_carpet=json.loads(request.data['carpets'])
+            for carpet_item in list_carpet:
+                carpet=Carpet.objects.get(barcode=carpet_item)
+                trans.carpets.add(carpet)
+                
+            list_services=json.loads(request.data['services'])
+            for services_item in list_services:
+                service=Service.objects.get(id=services_item)
+                trans.services.add(service)            
+
+
+            return Response({'status': 'okkk'}, status=status.HTTP_200_OK)
         except:
             return Response({'status': 'internal server error'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 

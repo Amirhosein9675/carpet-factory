@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
+import datetime
 
 
 # Create your models here.
@@ -57,22 +58,30 @@ class Status(models.Model):
 
 class Transfer(models.Model):
     carpets = models.ManyToManyField(Carpet)
-    status = models.OneToOneField(Status, on_delete=models.CASCADE)
-    service_privider = models.ForeignKey(
+    status = models.OneToOneField(
+        Status, blank=True, null=True, on_delete=models.CASCADE)
+    service_provider = models.ForeignKey(
         ServiceProviders, on_delete=models.CASCADE)
     services = models.ManyToManyField(Service)
     worker = models.ForeignKey(User, on_delete=models.CASCADE)
-    date = models.DateTimeField(auto_now=True)
+    date = models.DateTimeField()
     is_finished = models.BooleanField(default=False)
-    admin_veryfy = models.BooleanField(default=False)
+    admin_verify = models.BooleanField(default=False)
 
     def __str__(self) -> str:
-        return self.status.title
+        if self.is_finished and self.admin_verify:
+            return "تایید نهایی"
+        elif self.is_finished != True  and self.admin_verify !=True:
+            return "عدم تایید کارگر و ادمین"
+        elif self.is_finished == True  and self.admin_verify !=True:
+            return "عدم تایید ادمین"
+            
+            
 
-    @property
-    def valid_services(self):
-        valid_services = []
-        for service in self.services:
-            if service in self.service_privider['services']:
-                valid_services.append(service)
-        return valid_services
+    # @property
+    # def valid_services(self):
+    #     valid_services = []
+    #     for service in self.services:
+    #         if service in self.service_privider['services']:
+    #             valid_services.append(service)
+    #     return valid_services

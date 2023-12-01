@@ -10,6 +10,8 @@ urlpatterns = [
     path('services/all-services-list/',GetServices.as_view(),name='getservices'),
     
     path('carpet/register-from-excel/',CarpetFromExcel.as_view()),
+    path('transfer/create-transfer/',PostTransfer.as_view()),
+    
     
     path('updateservice/',UpdateServiceProviders.as_view(),name='updateservice'),
     path('getstatus/',GetStatus.as_view(),name='getsatus'),

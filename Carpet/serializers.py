@@ -128,3 +128,10 @@ class GetUserTokenSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = "__all__"
+class PostTransferSerializers(serializers.ModelSerializer):
+    
+    
+    
+    class Meta:
+        model=Transfer
+        fields="__all__"
