@@ -44,7 +44,7 @@ class GetServiceProviderSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ServiceProviders
-        fields = ['first_name', 'last_name', 'services']
+        fields = ['id','first_name', 'last_name', 'services']
 
 
 class CarpetSerializer(serializers.ModelSerializer):
