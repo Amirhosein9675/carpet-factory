@@ -105,7 +105,7 @@ class PostTransfer(APIView):
             worker = User.objects.get(id=request.data['worker'])
             service_provider = ServiceProviders.objects.get(id=request.data['service_provider'])
             date_string_2 = request.data['date']
-            format_2 = "%Y/%m/%d %H:%M:%S"
+            format_2 = "%d/%m/%Y %H:%M:%S"
             date_2 = datetime.strptime(date_string_2, format_2)
             trans = Transfer(worker=worker, service_provider=service_provider, date=date_2)
             trans.save()
@@ -121,10 +121,13 @@ class PostTransfer(APIView):
                 trans.services.add(service)            
 
 
-            return Response({'status': 'okkk'}, status=status.HTTP_200_OK)
+            return Response({'status': 'ok'}, status=status.HTTP_200_OK)
         except:
             return Response({'status': 'internal server error'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+class GetTransfer(ListAPIView):
+    queryset = Transfer.objects.all()
+    serializer_class = GetTransferSerializers
 
 class GetServices(ListAPIView):
     queryset = Service.objects.all()
