@@ -22,7 +22,7 @@ urlpatterns = [
     path('api-auth/', include('rest_framework.urls')),
     path('',include('Carpet.urls')),
     
-    path('api/authentication/', include('dj_rest_auth.urls')),
+    path('api/account/', include('dj_rest_auth.urls')),
     
     
 ]
