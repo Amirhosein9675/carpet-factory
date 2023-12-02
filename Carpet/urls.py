@@ -15,10 +15,12 @@ urlpatterns = [
     path('transfer/update-transfer/<int:pk>/',UpdateTransfer.as_view()),
     path('transfer/update/<int:pk>/',UpdateTransferByDRF.as_view()),
     
+    path('status/all-status-list/',GetStatus.as_view()),
+    
+    
     
     
     path('updateservice/',UpdateServiceProviders.as_view(),name='updateservice'),
-    path('getstatus/',GetStatus.as_view(),name='getsatus'),
     path('updatecarpet/',UpdateCarpet.as_view(),name='updatecarpet'),
     path('getuser/',GetUserDetail.as_view(),name='getuserdetail'),
    # path('getusertoken/',GetUserToken.as_view(),name='getusertoken'),
