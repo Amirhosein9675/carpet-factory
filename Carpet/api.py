@@ -112,11 +112,11 @@ class PostTransfer(APIView):
 
         transfer.save()
 
-        carpet_barcode = json.loads(data['carpet'])[0]
+        carpet_barcode = data['carpet']
         carpet = Carpet.objects.get(barcode=carpet_barcode)
         transfer.carpets.add(carpet)
 
-        list_services = json.loads(data['services'])
+        list_services = data['services']
         for services_item in list_services:
             service = Service.objects.get(id=services_item)
             transfer.services.add(service)
