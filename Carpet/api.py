@@ -2,7 +2,7 @@ from rest_framework.views import APIView
 from .models import *
 from rest_framework.response import Response
 from rest_framework import status
-from rest_framework.generics import ListAPIView
+from rest_framework.generics import ListAPIView, UpdateAPIView
 from rest_framework import serializers
 from .serializers import *
 import json
@@ -95,38 +95,72 @@ class CarpetFromExcel(APIView):
 
 
 class PostTransfer(APIView):
+    def create_transfer_necesary_fileds(self, data):
+
+        worker = User.objects.get(id=data['worker'])
+        service_provider = ServiceProviders.objects.get(
+            id=data['service_provider'])
+        date_string = data['date']
+        format = "%d/%m/%Y %H:%M:%S"
+        date = datetime.strptime(date_string, format)
+        fields = {"worker": worker,
+                  "service_provider": service_provider, "date": date}
+        return fields
+
+    def create_transfer(self, data, transfer):
+        print(80*'=')
+
+        transfer.save()
+
+        carpet_barcode = json.loads(data['carpet'])[0]
+        carpet = Carpet.objects.get(barcode=carpet_barcode)
+        transfer.carpets.add(carpet)
+
+        list_services = json.loads(data['services'])
+        for services_item in list_services:
+            service = Service.objects.get(id=services_item)
+            transfer.services.add(service)
+        print(80*'-')
+
     def post(self, request, format=None):
         try:
             for item in list(request.data.keys()):
                 if item not in ['carpet', 'status', 'service_provider', 'services', 'worker', 'date', 'is_finished', 'admin_verify']:
                     return Response({'status': f'key {item} is wrong'}, status=status.HTTP_400_BAD_REQUEST)
 
-        
-            worker = User.objects.get(id=request.data['worker'])
-            service_provider = ServiceProviders.objects.get(id=request.data['service_provider'])
-            date_string_2 = request.data['date']
-            format_2 = "%d/%m/%Y %H:%M:%S"
-            date_2 = datetime.strptime(date_string_2, format_2)
-            trans = Transfer(worker=worker, service_provider=service_provider, date=date_2)
-            trans.save()
-
-            carpet_barcode=request.data['carpet']
-            carpet=Carpet.objects.get(barcode=carpet_barcode)
-            trans.carpets.add(carpet)
-                
-            list_services=request.data['services']
-            for services_item in list_services:
-                service=Service.objects.get(id=services_item)
-                trans.services.add(service)            
-
+            self.create_transfer(request.data, Transfer(worker=self.create_transfer_necesary_fileds(request.data)['worker'],
+                                                        service_provider=self.create_transfer_necesary_fileds(request.data)[
+                'service_provider'],
+                date=self.create_transfer_necesary_fileds(request.data)['date']))
 
             return Response({'status': 'ok'}, status=status.HTTP_200_OK)
         except:
             return Response({'status': 'internal server error'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+
 class GetTransfer(ListAPIView):
     queryset = Transfer.objects.all()
     serializer_class = GetTransferSerializers
+
+
+class UpdateTransfer(PostTransfer, APIView):
+    def post(self, request, format=None):
+        try:
+            for item in list(request.data.keys()):
+                if item not in ['id', 'carpet', 'status', 'service_provider', 'services', 'worker', 'date', 'is_finished', 'admin_verify']:
+                    return Response({'status': f'key {item} is wrong'}, status=status.HTTP_400_BAD_REQUEST)
+            trans = Transfer.objects.get(id=request.data['id'])
+            trans.delete()
+            print(80*'*')
+            PostTransfer.create_transfer(self,request.data, Transfer(
+                worker=PostTransfer.create_transfer_necesary_fileds(self,request.data)['worker'],
+                service_provider=PostTransfer.create_transfer_necesary_fileds(self,request.data)['service_provider'],
+                date=PostTransfer.create_transfer_necesary_fileds(self,request.data)['date']))
+            return Response({'status': 'ok'}, status=status.HTTP_200_OK)
+
+        except:
+            return Response({'status': 'internal server error'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
 
 class GetServices(ListAPIView):
     queryset = Service.objects.all()
@@ -183,11 +217,11 @@ class GetUserDetail(ListAPIView):
     serializer_class = GetUserDetailSerializer
 
 
-class GetUserToken(ListAPIView):
-    def get_queryset(self):
-        print(80*'-')
-        # print(self.queryset.user)
-        # print(self.queryset.auth)
-        print(80*'-')
-        return User.objects.all()
-    serializer_class = GetUserTokenSerializer
+# class GetUserToken(ListAPIView):
+#     def get_queryset(self):
+#         print(80*'-')
+#         # print(self.queryset.user)
+#         # print(self.queryset.auth)
+#         print(80*'-')
+#         return User.objects.all()
+#     serializer_class = GetUserTokenSerializer
