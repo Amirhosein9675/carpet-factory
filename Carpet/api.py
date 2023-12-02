@@ -114,7 +114,7 @@ class PostTransfer(APIView):
         transfer.save()
 
         if len(data['carpet']) > 0:
-            carpet_barcode = data['carpet']
+            carpet_barcode = data['carpet'][0]
             #carpet_barcode = json.loads(data['carpet'])
             carpet = Carpet.objects.get(barcode=carpet_barcode)
             transfer.carpets.add(carpet)
