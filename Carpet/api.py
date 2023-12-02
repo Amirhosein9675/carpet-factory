@@ -130,8 +130,8 @@ class PostTransfer(APIView):
                     return Response({'status': f'key {item} is wrong'}, status=status.HTTP_400_BAD_REQUEST)
             fields = self.create_transfer_necesary_fileds(request.data)
             worker = fields['worker']
-            service_provider = ['service_provider']
-            date = ['date']
+            service_provider = fields['service_provider']
+            date = fields['date']
             self.create_transfer(request.data, Transfer(
                 worker=worker, service_provider=service_provider, date=date))
 
