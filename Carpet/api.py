@@ -102,7 +102,7 @@ class PostTransfer(APIView):
         service_provider = ServiceProviders.objects.get(
             id=data['service_provider'])
         date_string = data['date']
-        format = "%d/%m/%Y %H:%M:%S"
+        format = "%Y/%m/%d %H:%M:%S"
         date = datetime.strptime(date_string, format)
         fields = {"worker": worker,
                   "service_provider": service_provider, "date": date}
