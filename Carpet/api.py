@@ -110,21 +110,23 @@ class PostTransfer(APIView):
 
     def create_transfer(self, data, transfer):
         print(80*'=')
-
+        transfer.is_finished = data['is_finished']
         transfer.save()
 
         carpet_barcode = data['carpet']
+        # carpet_barcode = json.loads(data['carpet'])
         carpet = Carpet.objects.get(barcode=carpet_barcode)
         transfer.carpets.add(carpet)
         if len(data['services']) > 0:
+            # if len(json.loads(data['services'])) > 0:
             list_services = data['services']
+            # list_services = json.loads(data['services'])
             for services_item in list_services:
                 service = Service.objects.get(id=services_item)
                 transfer.services.add(service)
         print(80*'()')
-        #print(json.loads(data['services']))
-        #print(type(json.loads(data['services'])))
-
+        # print(json.loads(data['services']))
+        # print(type(json.loads(data['services'])))
 
     def post(self, request, format=None):
         try:
