@@ -12,7 +12,9 @@ urlpatterns = [
     path('carpet/register-from-excel/',CarpetFromExcel.as_view()),
     path('transfer/create-transfer/',PostTransfer.as_view()),
     path('transfer/all-transfer-list/',GetTransfer.as_view()),
-    path('transfer/update-transfer/',UpdateTransfer.as_view()),
+    path('transfer/update-transfer/<int:pk>/',UpdateTransfer.as_view()),
+    path('transfer/update/<int:pk>/',UpdateTransferByDRF.as_view()),
+    
     
     
     path('updateservice/',UpdateServiceProviders.as_view(),name='updateservice'),

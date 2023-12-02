@@ -44,7 +44,7 @@ class GetServiceProviderSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ServiceProviders
-        fields = ['id','first_name', 'last_name', 'services']
+        fields = ['id', 'first_name', 'last_name', 'services']
 
 
 class CarpetSerializer(serializers.ModelSerializer):
@@ -128,10 +128,57 @@ class GetUserTokenSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = "__all__"
+
+
 class GetTransferSerializers(serializers.ModelSerializer):
-    
-    
-    
+
     class Meta:
-        model=Transfer
-        fields="__all__"
+        model = Transfer
+        fields = "__all__"
+
+
+# # # # class TransferSerializer(serializers.ModelSerializer, serializers.Serializer):
+# # # #     # carpet_barcode = json.loads(data['carpet'])[0]
+# # # #     # carpet = Carpet.objects.get(barcode=carpet_barcode)
+# # # #     # transfer.carpets.add(carpet)
+
+# # # #     # list_services = json.loads(data['services'])
+# # # #     # for services_item in list_services:
+# # # #     #     service = Service.objects.get(id=services_item)
+# # # #     #     transfer.services.add(service)
+
+# # # #     carpets = serializers.ManyRelatedField(Carpet)
+# # # #     status = serializers.On(
+# # # #         Status, blank=True, null=True, on_delete=models.CASCADE)
+# # # #     service_provider = serializers.ForeignKey(
+# # # #         ServiceProviders, on_delete=models.CASCADE)
+# # # #     services = serializers.ManyToManyField(Service)
+# # # #     worker = models.ForeignKey(User, on_delete=models.CASCADE)
+# # # #     date = serializers.DateTimeField()
+# # # #     is_finished = serializers.BooleanField(default=False)
+# # # #     admin_verify = serializers.BooleanField(default=False)
+
+# # # #     def update(self, instance, validated_data):
+# # # #         """
+# # # #         Update and return an existing `Snippet` instance, given the validated data.
+# # # #         """
+# # # #         instance.worker = validated_data.get('worker', instance.worker)
+# # # #         instance.service_provider = validated_data.get(
+# # # #             'service_provider', instance.service_provider)
+# # # #         instance.services = validated_data.get('services', instance.services)
+# # # #         instance.is_finished = validated_data.get(
+# # # #             'is_finished', instance.is_finished)
+# # # #         instance.status = validated_data.get('status', instance.status)
+# # # #         instance.admin_verify = validated_data.get(
+# # # #             'admin_verify', instance.admin_verify)
+# # # #         instance.carpet = validated_data.get('carpet', instance.carpet)
+# # # #         instance.date = validated_data.get('date', instance.date)
+
+# # # #         instance.save()
+# # # #         return instance
+
+class UpdateAgain1serializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Transfer
+        fields = "__all__"

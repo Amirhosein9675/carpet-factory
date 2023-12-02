@@ -7,6 +7,7 @@ from rest_framework import serializers
 from .serializers import *
 import json
 from datetime import datetime
+from django.http import Http404
 
 
 class RegisterUser(APIView):
@@ -127,11 +128,12 @@ class PostTransfer(APIView):
             for item in list(request.data.keys()):
                 if item not in ['carpet', 'status', 'service_provider', 'services', 'worker', 'date', 'is_finished', 'admin_verify']:
                     return Response({'status': f'key {item} is wrong'}, status=status.HTTP_400_BAD_REQUEST)
-
-            self.create_transfer(request.data, Transfer(worker=self.create_transfer_necesary_fileds(request.data)['worker'],
-                                                        service_provider=self.create_transfer_necesary_fileds(request.data)[
-                'service_provider'],
-                date=self.create_transfer_necesary_fileds(request.data)['date']))
+            fields = self.create_transfer_necesary_fileds(request.data)
+            worker = fields['worker']
+            service_provider = ['service_provider']
+            date = ['date']
+            self.create_transfer(request.data, Transfer(
+                worker=worker, service_provider=service_provider, date=date))
 
             return Response({'status': 'ok'}, status=status.HTTP_200_OK)
         except:
@@ -143,19 +145,20 @@ class GetTransfer(ListAPIView):
     serializer_class = GetTransferSerializers
 
 
+class UpdateTransferByDRF(UpdateAPIView):
+    queryset = Transfer.objects.all()
+    serializer_class = UpdateAgain1serializer
+
+
 class UpdateTransfer(PostTransfer, APIView):
     def post(self, request, format=None):
         try:
             for item in list(request.data.keys()):
                 if item not in ['id', 'carpet', 'status', 'service_provider', 'services', 'worker', 'date', 'is_finished', 'admin_verify']:
                     return Response({'status': f'key {item} is wrong'}, status=status.HTTP_400_BAD_REQUEST)
-            trans = Transfer.objects.get(id=request.data['id'])
-            trans.delete()
-            print(80*'*')
-            PostTransfer.create_transfer(self,request.data, Transfer(
-                worker=PostTransfer.create_transfer_necesary_fileds(self,request.data)['worker'],
-                service_provider=PostTransfer.create_transfer_necesary_fileds(self,request.data)['service_provider'],
-                date=PostTransfer.create_transfer_necesary_fileds(self,request.data)['date']))
+            transfer = Transfer.objects.get(id=request.data['id'])
+            # trans.delete()
+            PostTransfer.create_transfer(transfer)
             return Response({'status': 'ok'}, status=status.HTTP_200_OK)
 
         except:
@@ -194,7 +197,6 @@ class GetStatus(ListAPIView):
 
 
 class UpdateCarpet(APIView):
-
     def post(self, request):
         try:
             staus_upadat = Status.objects.get(id=request.data['status_id'])
@@ -217,11 +219,5 @@ class GetUserDetail(ListAPIView):
     serializer_class = GetUserDetailSerializer
 
 
-# class GetUserToken(ListAPIView):
-#     def get_queryset(self):
-#         print(80*'-')
-#         # print(self.queryset.user)
-#         # print(self.queryset.auth)
-#         print(80*'-')
-#         return User.objects.all()
-#     serializer_class = GetUserTokenSerializer
+    queryset = Transfer.objects.all()
+    serializer_class = UpdateAgain1serializer
