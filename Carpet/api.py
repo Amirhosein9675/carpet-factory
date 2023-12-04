@@ -2,12 +2,22 @@ from rest_framework.views import APIView
 from .models import *
 from rest_framework.response import Response
 from rest_framework import status
-from rest_framework.generics import ListAPIView, UpdateAPIView
+from rest_framework.generics import ListAPIView, UpdateAPIView, CreateAPIView
 from rest_framework import serializers
 from .serializers import *
 import json
 from datetime import datetime
 from django.http import Http404
+from rest_framework.pagination import PageNumberPagination
+from rest_framework import pagination
+
+
+class CustomPagination(pagination.PageNumberPagination):
+    page_size = 2
+    page = 1
+    page_size_query_param = 'page_size'
+    max_page_size = 50
+    page_query_param = 'page'
 
 
 class RegisterUser(APIView):
@@ -44,9 +54,71 @@ class RegisterUser(APIView):
             return Response({'status': 'internal service error'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
-class GetDetailServiceprovider(ListAPIView):
+class ServiceproviderList(ListAPIView):
     queryset = ServiceProviders.objects.all()
     serializer_class = GetServiceProviderSerializer
+
+
+class ServiceproviderCreate(APIView):
+    def create_service_provider_neccessary_fields(self, data):
+
+        first_name = data['first_name']
+        last_name = data['last_name']
+        phone_number = data['phone_number']
+        address = data['address']
+        national_code = data['national_code']
+
+        fields = {
+            "first_name": first_name,
+            "last_name": last_name,
+            "phone_number": phone_number,
+            "address": address,
+            "national_code": national_code,
+        }
+        return fields
+
+    def create_transfer(self, data, service_provider):
+        print(80*'/')
+        service_provider.save()
+        print(80*'&')
+
+        # if len(data['services']) > 0:
+        if len(json.loads(data['services'])) > 0:
+            # list_services = data['services']
+            list_services = json.loads(data['services'])
+            for services_item in list_services:
+                service = Service.objects.get(id=services_item)
+                service_provider.services.add(service)
+        print(80*'()')
+        # print(json.loads(data['services']))
+        # print(type(json.loads(data['services'])))
+
+    def post(self, request, format=None):
+        try:
+
+            for item in list(request.data.keys()):
+                if item not in ['first_name', 'last_name', 'phone_number', 'address', 'national_code', 'services']:
+                    return Response({'status': f'key {item} is wrong'}, status=status.HTTP_400_BAD_REQUEST)
+
+            self.create_transfer(request.data, ServiceProviders(
+                first_name=self.create_service_provider_neccessary_fields(request.data)[
+                    'first_name'],
+                last_name=self.create_service_provider_neccessary_fields(request.data)[
+                    'last_name'],
+                phone_number=self.create_service_provider_neccessary_fields(request.data)[
+                    'phone_number'],
+                address=self.create_service_provider_neccessary_fields(request.data)[
+                    'address'],
+                national_code=self.create_service_provider_neccessary_fields(request.data)[
+                    'national_code'],
+
+            )
+            )
+
+            return Response({'status': 'ok'}, status=status.HTTP_200_OK)
+        except:
+
+            return Response({'status': 'internal server error'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 class GetCarpet(ListAPIView):
@@ -106,6 +178,8 @@ class PostTransfer(APIView):
         date = datetime.strptime(date_string, format)
         fields = {"worker": worker,
                   "service_provider": service_provider, "date": date}
+        print(fields)
+        print(80*'+')
         return fields
 
     def create_transfer(self, data, transfer):
@@ -113,22 +187,23 @@ class PostTransfer(APIView):
         transfer.is_finished = data['is_finished']
         status = Status.objects.get(id=data['status'])
         transfer.status = status
+        print(transfer)
         print(80*'/')
         transfer.save()
         print(80*'&')
 
-        #if len(json.loads(data['carpet'])) > 0:
-        if len(data['carpet']) > 0:
-            carpet_barcode = data['carpet'][0]
-            #carpet_barcode = json.loads(data['carpet'])[0]
+        if len(json.loads(data['carpet'])) > 0:
+        #if len(data['carpet']) > 0:
+            #carpet_barcode = data['carpet'][0]
+            carpet_barcode = json.loads(data['carpet'])[0]
             print(carpet_barcode)
             print(80*'f')
             carpet = Carpet.objects.get(barcode=carpet_barcode)
             transfer.carpets.add(carpet)
-        if len(data['services']) > 0:
-        #if len(json.loads(data['services'])) > 0:
-            list_services = data['services']
-            #list_services = json.loads(data['services'])
+        #if len(data['services']) > 0:
+        if len(json.loads(data['services'])) > 0:
+            #list_services = data['services']
+            list_services = json.loads(data['services'])
             for services_item in list_services:
                 service = Service.objects.get(id=services_item)
                 transfer.services.add(service)
@@ -155,6 +230,7 @@ class PostTransfer(APIView):
 class GetTransfer(ListAPIView):
     queryset = Transfer.objects.all()
     serializer_class = GetTransferSerializers
+    pagination_class = CustomPagination
 
 
 class UpdateTransfer(PostTransfer, APIView):
@@ -231,5 +307,57 @@ class GetUserDetail(ListAPIView):
     queryset = User.objects.all()
     serializer_class = GetUserDetailSerializer
 
-    queryset = Transfer.objects.all()
-    serializer_class = UpdateAgain1serializer
+
+# class TransferPage(ListAPIView):
+#     queryset = Transfer.objects.all()
+#     serializer_class = GetTransferSerializers
+#     pagination_class = PageNumberPagination
+
+
+class UserList(ListAPIView):
+    queryset = User.objects.all()
+    serializer_class = GetUserListSerializer
+
+
+class DriverList(ListAPIView):
+    queryset = Driver.objects.all()
+    serializer_class = DriverListSerializer
+
+
+class DriverCreate(CreateAPIView):
+    queryset = Driver.objects.all()
+    serializer_class = DriverListSerializer
+
+
+class TransferCarpet(APIView):
+    def get(self, request,*args, **kwargs):
+        try:
+            data=[]
+            print(self.request.GET.get('barcode_pk'))
+            barcode=self.request.GET.get('barcode_pk')
+            carpet=Carpet.objects.get(barcode=barcode)
+            transfers=Transfer.objects.filter(carpets=carpet)
+            print(transfers)
+            print(carpet)
+            for transfer in transfers:
+                print(transfer)
+                serializer=TransferCarpetSerializers(transfer)
+                print(serializer.data)
+                #if serializer.is_valid():
+                data.append(serializer.data)
+                #else:
+                    #return Response({'status':serializer.error_messages},status=status.HTTP_400_BAD_REQUEST)
+            
+            return Response({'data': data}, status=status.HTTP_200_OK)
+            
+        except:
+            return Response({'status': 'internal server error'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            
+    
+    
+    
+# #get kole userha //
+# get va poste hame rannde //
+# get va poste service provider//
+# get hme transfer ==>
+# get hame farsh ha ==>filterha:id midi joziat migiri,barcode midi to transfer etlat migiri

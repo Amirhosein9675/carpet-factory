@@ -58,7 +58,7 @@ class Status(models.Model):
 
 class Transfer(models.Model):
     carpets = models.ManyToManyField(Carpet)
-    status = models.OneToOneField(
+    status = models.ForeignKey(
         Status, blank=True, null=True, on_delete=models.CASCADE)
     service_provider = models.ForeignKey(
         ServiceProviders, on_delete=models.CASCADE)
