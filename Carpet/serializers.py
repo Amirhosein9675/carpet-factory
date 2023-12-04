@@ -177,12 +177,28 @@ class TransferCarpetSerializers(serializers.ModelSerializer):
         worker_obj['last_name']=obj.worker.last_name
         data.append(worker_obj)
         return data
-        
+    def get_service_provider(self,obj):
+        data=[]
+        service_provider_obj={}
+        service_provider_obj['id']=obj.service_provider.id
+        service_provider_obj['first_name']=obj.service_provider.first_name
+        service_provider_obj['last_name']=obj.service_provider.last_name
+        data.append(service_provider_obj)
+        return data
+    
+    def get_status(self,obj):
+        data=[]
+        status_obj={}
+        status_obj['id']=obj.status.id
+        status_obj['title']=obj.status.title
+
+        data.append(status_obj)
+        return data
     carpets = serializers.SerializerMethodField("get_carpets")
     services = serializers.SerializerMethodField("get_services")
     worker = serializers.SerializerMethodField("get_worker")
-
-
+    service_provider=serializers.SerializerMethodField("get_service_provider")
+    status=serializers.SerializerMethodField("get_status")
     class Meta:
         model = Transfer
         fields = "__all__"

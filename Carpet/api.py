@@ -192,18 +192,18 @@ class PostTransfer(APIView):
         transfer.save()
         print(80*'&')
 
-        if len(json.loads(data['carpet'])) > 0:
-        #if len(data['carpet']) > 0:
-            #carpet_barcode = data['carpet'][0]
-            carpet_barcode = json.loads(data['carpet'])[0]
+        #if len(json.loads(data['carpet'])) > 0:
+        if len(data['carpet']) > 0:
+            carpet_barcode = data['carpet'][0]
+            #carpet_barcode = json.loads(data['carpet'])[0]
             print(carpet_barcode)
             print(80*'f')
             carpet = Carpet.objects.get(barcode=carpet_barcode)
             transfer.carpets.add(carpet)
-        #if len(data['services']) > 0:
-        if len(json.loads(data['services'])) > 0:
-            #list_services = data['services']
-            list_services = json.loads(data['services'])
+        if len(data['services']) > 0:
+        #if len(json.loads(data['services'])) > 0:
+            list_services = data['services']
+            #list_services = json.loads(data['services'])
             for services_item in list_services:
                 service = Service.objects.get(id=services_item)
                 transfer.services.add(service)
