@@ -185,6 +185,7 @@ class PostTransfer(APIView):
     def create_transfer(self, data, transfer):
         print(80*'=')
         transfer.is_finished = data['is_finished']
+        transfer.admin_verify = data['admin_verify']
         status = Status.objects.get(id=data['status'])
         transfer.status = status
         print(transfer)
@@ -192,18 +193,18 @@ class PostTransfer(APIView):
         transfer.save()
         print(80*'&')
 
-        #if len(json.loads(data['carpet'])) > 0:
+        # if len(json.loads(data['carpet'])) > 0:
         if len(data['carpet']) > 0:
             carpet_barcode = data['carpet'][0]
-            #carpet_barcode = json.loads(data['carpet'])[0]
+            # carpet_barcode = json.loads(data['carpet'])[0]
             print(carpet_barcode)
             print(80*'f')
             carpet = Carpet.objects.get(barcode=carpet_barcode)
             transfer.carpets.add(carpet)
         if len(data['services']) > 0:
-        #if len(json.loads(data['services'])) > 0:
+            # if len(json.loads(data['services'])) > 0:
             list_services = data['services']
-            #list_services = json.loads(data['services'])
+            # list_services = json.loads(data['services'])
             for services_item in list_services:
                 service = Service.objects.get(id=services_item)
                 transfer.services.add(service)
@@ -330,34 +331,39 @@ class DriverCreate(CreateAPIView):
 
 
 class TransferCarpet(APIView):
-    def get(self, request,*args, **kwargs):
+    def get(self, request, *args, **kwargs):
         try:
-            data=[]
-            print(self.request.GET.get('barcode_pk'))
-            barcode=self.request.GET.get('barcode_pk')
-            carpet=Carpet.objects.get(barcode=barcode)
-            transfers=Transfer.objects.filter(carpets=carpet)
-            print(transfers)
-            print(carpet)
+            data = []
+            params = dict(request.GET)
+            for key in params:
+                params[key] = params[key][0]
+            print(params)
+            transfers = Transfer.objects.filter(date__range=["2022-09-01", "2022-01-31"])
             for transfer in transfers:
-                print(transfer)
-                serializer=TransferCarpetSerializers(transfer)
-                print(serializer.data)
-                #if serializer.is_valid():
+                # print(transfer)
+                serializer = TransferCarpetSerializers(transfer)
+                # print(serializer.data)
+                # if serializer.is_valid():
                 data.append(serializer.data)
-                #else:
-                    #return Response({'status':serializer.error_messages},status=status.HTTP_400_BAD_REQUEST)
-            
+                # else:
+                # return Response({'status':serializer.error_messages},status=status.HTTP_400_BAD_REQUEST)
+
             return Response({'data': data}, status=status.HTTP_200_OK)
-            
+
         except:
             return Response({'status': 'internal server error'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-            
-    
-    
-    
+
+
 # #get kole userha //
 # get va poste hame rannde //
 # get va poste service provider//
 # get hme transfer ==>
 # get hame farsh ha ==>filterha:id midi joziat migiri,barcode midi to transfer etlat migiri
+
+# filters = {
+#     key: value
+#     for key, value in request.post.items()
+#     if key in ['filter1', 'filter2', 'filter3']
+# }
+
+# Test.objects.filter(**filters)
