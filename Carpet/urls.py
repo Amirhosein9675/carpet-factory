@@ -9,6 +9,8 @@ urlpatterns = [
     path('carpet/all-carpets-list/', GetCarpet.as_view(), name='getcarpet'),
     path('carpet/detail/<pk>/', CarpetDetails.as_view(), name='carpetdetail'),
     path('carpet/register-from-excel/', CarpetFromExcel.as_view()),
+    
+    path('transfer/filter-carpet2/', TransferCarpet2.as_view()),
 
 
     path('transfer/create-transfer/', PostTransfer.as_view()),

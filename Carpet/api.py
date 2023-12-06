@@ -10,6 +10,7 @@ from datetime import datetime
 from django.http import Http404
 from rest_framework.pagination import PageNumberPagination
 from rest_framework import pagination
+from django_filters.rest_framework import DjangoFilterBackend
 
 
 class CustomPagination(pagination.PageNumberPagination):
@@ -334,25 +335,59 @@ class TransferCarpet(APIView):
     def get(self, request, *args, **kwargs):
         try:
             data = []
+            transfers=Transfer.objects.all()
+            services_param = request.query_params.get('services').split(',')
+            print(len(services_param))
             params = dict(request.GET)
+            print(params['services'])
+            if "services" in params.keys():
+                services_param = request.query_params.get('services').split(',')
+                if services_param[0] !='':
+                    for service in services_param:
+                        transfers = transfers.filter(services=service)
+                print(params['services'])
+                print(services_param)
+                params.pop('services')
+            if "carpets" in params.keys():
+                carpets_barcode_params=request.query_params.get('carpets').split(',')
+                if carpets_barcode_params[0] !='':
+                    for carpet_barcode in carpets_barcode_params:
+                        transfers = transfers.filter(carpets__barcode=carpet_barcode)
+                print(params['carpets'])
+                print(carpets_barcode_params)
+                params.pop('carpets')
+            if "dates" in params.keys():
+                dates_param=request.query_params.get('dates').split(',')
+                if dates_param[0] !='':
+                    transfers=transfers.filter(date__range=dates_param)
+                    print(dates_param)
+                params.pop('dates') 
             for key in params:
                 params[key] = params[key][0]
             print(params)
-            transfers = Transfer.objects.filter(date__range=["2022-09-01", "2022-01-31"])
+            transfers = transfers.filter(**params)
             for transfer in transfers:
-                # print(transfer)
                 serializer = TransferCarpetSerializers(transfer)
-                # print(serializer.data)
-                # if serializer.is_valid():
                 data.append(serializer.data)
-                # else:
-                # return Response({'status':serializer.error_messages},status=status.HTTP_400_BAD_REQUEST)
-
             return Response({'data': data}, status=status.HTTP_200_OK)
 
         except:
             return Response({'status': 'internal server error'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+
+class TransferCarpet2(ListAPIView):
+
+    queryset = Transfer.objects.all()
+    serializer_class = TransferCarpetSerializers
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ['services']
+
+    def get_queryset(self):
+        services = self.request.query_params.get('services').split(',')
+        print(services)
+        d = self.queryset.filter(services__in=services)
+        print(len(d))
+        return self.queryset.filter(services__in=services)
 
 # #get kole userha //
 # get va poste hame rannde //
