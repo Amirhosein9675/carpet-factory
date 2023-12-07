@@ -1,6 +1,6 @@
 from django.urls import path
 from .api import *
-
+from .views import CustomUserDetailsView
 urlpatterns = [
 
     path('register/', RegisterUser.as_view(), name=''),
@@ -42,6 +42,11 @@ urlpatterns = [
 
     path('services/all-services-list/',
          GetServices.as_view(), name='getservices'),
+    
+    path('api/account/user/', CustomUserDetailsView.as_view(), name='user-details'),
+
 
 
 ]
+
+   

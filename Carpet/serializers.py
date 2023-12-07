@@ -1,5 +1,18 @@
 from rest_framework import serializers
 from .models import *
+from dj_rest_auth.serializers import UserDetailsSerializer
+from django.contrib.auth import get_user_model
+
+class CustomUserDetailsSerializer(UserDetailsSerializer):
+    is_staff = serializers.SerializerMethodField()
+
+    class Meta(UserDetailsSerializer.Meta):
+        model = get_user_model()
+        fields = ('pk', 'username', 'email', 'is_staff', 'first_name','last_name',)
+        print("777777")
+
+    def get_is_staff(self, obj):
+        return obj.is_staff
 
 
 class RegisterUserSerializer(serializers.Serializer):
