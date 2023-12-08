@@ -61,9 +61,9 @@ class Transfer(models.Model):
     status = models.ForeignKey(
         Status, blank=True, null=True, on_delete=models.CASCADE)
     service_provider = models.ForeignKey(
-        ServiceProviders, on_delete=models.CASCADE)
+        ServiceProviders, on_delete=models.CASCADE,null=True,blank=True)
     services = models.ManyToManyField(Service)
-    worker = models.ForeignKey(User, on_delete=models.CASCADE)
+    worker = models.ForeignKey(User, on_delete=models.CASCADE,null=True,blank=True)
     date = models.DateTimeField()
     is_finished = models.BooleanField(default=False)
     admin_verify = models.BooleanField(default=False)

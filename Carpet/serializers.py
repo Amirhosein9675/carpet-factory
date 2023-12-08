@@ -3,16 +3,16 @@ from .models import *
 from dj_rest_auth.serializers import UserDetailsSerializer
 from django.contrib.auth import get_user_model
 
-class CustomUserDetailsSerializer(UserDetailsSerializer):
-    is_staff = serializers.SerializerMethodField()
+# class CustomUserDetailsSerializer(UserDetailsSerializer):
+#     is_staff = serializers.SerializerMethodField()
 
-    class Meta(UserDetailsSerializer.Meta):
-        model = get_user_model()
-        fields = ('pk', 'username', 'email', 'is_staff', 'first_name','last_name',)
-        print("777777")
+#     class Meta(UserDetailsSerializer.Meta):
+#         model = get_user_model()
+#         fields = ('pk', 'username', 'email', 'is_staff', 'first_name','last_name',)
+#         print("777777")
 
-    def get_is_staff(self, obj):
-        return obj.is_staff
+#     def get_is_staff(self, obj):
+#         return obj.is_staff
 
 
 class RegisterUserSerializer(serializers.Serializer):
@@ -215,3 +215,42 @@ class TransferCarpetSerializers(serializers.ModelSerializer):
     class Meta:
         model = Transfer
         fields = "__all__"
+
+
+
+###############teeeeestttttttt
+class CarpetSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Carpet
+        fields = ['barcode']
+
+class StatusSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Status
+        fields = '__all__'
+
+class ServiceProvidersSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ServiceProviders
+        fields = '__all__'
+
+class ServiceSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Service
+        fields = '__all__'
+
+class UserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = '__all__'
+
+class TransferSerializer(serializers.ModelSerializer):
+    carpets = CarpetSerializer(many=True)
+    status = StatusSerializer()
+    service_provider = ServiceProvidersSerializer()
+    services = ServiceSerializer(many=True)
+    worker = UserSerializer()
+
+    class Meta:
+        model = Transfer
+        fields = '__all__'

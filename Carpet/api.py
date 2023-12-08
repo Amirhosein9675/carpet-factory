@@ -61,64 +61,29 @@ class ServiceproviderList(ListAPIView):
 
 
 class ServiceproviderCreate(APIView):
-    def create_service_provider_neccessary_fields(self, data):
-
-        first_name = data['first_name']
-        last_name = data['last_name']
-        phone_number = data['phone_number']
-        address = data['address']
-        national_code = data['national_code']
-
-        fields = {
-            "first_name": first_name,
-            "last_name": last_name,
-            "phone_number": phone_number,
-            "address": address,
-            "national_code": national_code,
-        }
-        return fields
-
-    def create_transfer(self, data, service_provider):
-        print(80*'/')
-        service_provider.save()
-        print(80*'&')
-
-        # if len(data['services']) > 0:
-        if len(json.loads(data['services'])) > 0:
-            # list_services = data['services']
-            list_services = json.loads(data['services'])
-            for services_item in list_services:
-                service = Service.objects.get(id=services_item)
-                service_provider.services.add(service)
-        print(80*'()')
-        # print(json.loads(data['services']))
-        # print(type(json.loads(data['services'])))
-
     def post(self, request, format=None):
         try:
-
             for item in list(request.data.keys()):
                 if item not in ['first_name', 'last_name', 'phone_number', 'address', 'national_code', 'services']:
                     return Response({'status': f'key {item} is wrong'}, status=status.HTTP_400_BAD_REQUEST)
-
-            self.create_transfer(request.data, ServiceProviders(
-                first_name=self.create_service_provider_neccessary_fields(request.data)[
-                    'first_name'],
-                last_name=self.create_service_provider_neccessary_fields(request.data)[
-                    'last_name'],
-                phone_number=self.create_service_provider_neccessary_fields(request.data)[
-                    'phone_number'],
-                address=self.create_service_provider_neccessary_fields(request.data)[
-                    'address'],
-                national_code=self.create_service_provider_neccessary_fields(request.data)[
-                    'national_code'],
-
-            )
-            )
-
+            service_p = ServiceProviders()
+            service_p.first_name = request.data['first_name']
+            service_p.last_name = request.data['first_name']
+            service_p.phone_number = request.data['phone_number']
+            service_p.address = request.data['address']
+            service_p.national_code = request.data['national_code']
+            service_p.save()
+            # if len(request.data['services']) > 0:
+            if len(json.loads(request.data['services'])) > 0:
+                # list_services = request.data['services']
+                list_services = json.loads(request.data['services'])
+                for services_item in list_services:
+                    service = Service.objects.get(id=services_item)
+                    service_p.services.add(service)
+            else:
+                return Response({'status': 'field services can not null'}, status=status.HTTP_400_BAD_REQUEST)
             return Response({'status': 'ok'}, status=status.HTTP_200_OK)
         except:
-
             return Response({'status': 'internal server error'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
@@ -170,15 +135,18 @@ class CarpetFromExcel(APIView):
 
 class PostTransfer(APIView):
     def create_transfer_necesary_fileds(self, data):
-
-        worker = User.objects.get(id=data['worker'])
-        service_provider = ServiceProviders.objects.get(
-            id=data['service_provider'])
+        print(80*'$')
+        print(len(data['worker']))
+        if len(data['worker']) > 0:
+            print('amiiiir')
+            worker = User.objects.get(id=data['worker'])
+        if len(data['service_provider']) > 0:
+            service_provider = ServiceProviders.objects.get(
+                id=data['service_provider'])
         date_string = data['date']
         format = "%Y/%m/%d %H:%M:%S"
         date = datetime.strptime(date_string, format)
-        fields = {"worker": worker,
-                  "service_provider": service_provider, "date": date}
+        fields = {"date": date}
         print(fields)
         print(80*'+')
         return fields
@@ -194,18 +162,18 @@ class PostTransfer(APIView):
         transfer.save()
         print(80*'&')
 
-        # if len(json.loads(data['carpet'])) > 0:
-        if len(data['carpet']) > 0:
-            carpet_barcode = data['carpet'][0]
-            # carpet_barcode = json.loads(data['carpet'])[0]
+        if len(json.loads(data['carpet'])) > 0:
+            # if len(data['carpet']) > 0:
+            # carpet_barcode = data['carpet'][0]
+            carpet_barcode = json.loads(data['carpet'])[0]
             print(carpet_barcode)
             print(80*'f')
             carpet = Carpet.objects.get(barcode=carpet_barcode)
             transfer.carpets.add(carpet)
-        if len(data['services']) > 0:
-            # if len(json.loads(data['services'])) > 0:
-            list_services = data['services']
-            # list_services = json.loads(data['services'])
+        # if len(data['services']) > 0:
+        if len(json.loads(data['services'])) > 0:
+            # list_services = data['services']
+            list_services = json.loads(data['services'])
             for services_item in list_services:
                 service = Service.objects.get(id=services_item)
                 transfer.services.add(service)
@@ -218,11 +186,14 @@ class PostTransfer(APIView):
             for item in list(request.data.keys()):
                 if item not in ['carpet', 'status', 'service_provider', 'services', 'worker', 'date', 'is_finished', 'admin_verify']:
                     return Response({'status': f'key {item} is wrong'}, status=status.HTTP_400_BAD_REQUEST)
-
-            self.create_transfer(request.data, Transfer(worker=self.create_transfer_necesary_fileds(request.data)['worker'],
-                                                        service_provider=self.create_transfer_necesary_fileds(request.data)[
-                'service_provider'],
-                date=self.create_transfer_necesary_fileds(request.data)['date']))
+            if len(request.data['worker']) and len(request.data['service_provider']):
+                self.create_transfer(request.data, Transfer(worker=self.create_transfer_necesary_fileds(request.data)['worker'],
+                                                            service_provider=self.create_transfer_necesary_fileds(request.data)[
+                    'service_provider'],
+                    date=self.create_transfer_necesary_fileds(request.data)['date']))
+            else:
+                self.create_transfer(request.data, Transfer(
+                    date=self.create_transfer_necesary_fileds(request.data)['date']))
 
             return Response({'status': 'ok'}, status=status.HTTP_200_OK)
         except:
@@ -335,37 +306,46 @@ class TransferCarpet(APIView):
     def get(self, request, *args, **kwargs):
         try:
             data = []
-            transfers=Transfer.objects.all()
-            services_param = request.query_params.get('services').split(',')
-            print(len(services_param))
+            transfers = Transfer.objects.all()
+            print(len(request.query_params))
+            print(dict(request.GET))
+            #services_param = request.query_params.get('services').split(',')
+            #print(len(services_param))
             params = dict(request.GET)
-            print(params['services'])
+            #print(params['services'])
             if "services" in params.keys():
-                services_param = request.query_params.get('services').split(',')
-                if services_param[0] !='':
+                services_param = request.query_params.get(
+                    'services').split(',')
+                if services_param[0] != '':
                     for service in services_param:
                         transfers = transfers.filter(services=service)
                 print(params['services'])
                 print(services_param)
                 params.pop('services')
             if "carpets" in params.keys():
-                carpets_barcode_params=request.query_params.get('carpets').split(',')
-                if carpets_barcode_params[0] !='':
+                carpets_barcode_params = request.query_params.get(
+                    'carpets').split(',')
+                if carpets_barcode_params[0] != '':
                     for carpet_barcode in carpets_barcode_params:
-                        transfers = transfers.filter(carpets__barcode=carpet_barcode)
+                        transfers = transfers.filter(
+                            carpets__barcode=carpet_barcode)
                 print(params['carpets'])
                 print(carpets_barcode_params)
                 params.pop('carpets')
             if "dates" in params.keys():
-                dates_param=request.query_params.get('dates').split(',')
-                if dates_param[0] !='':
-                    transfers=transfers.filter(date__range=dates_param)
+                dates_param = request.query_params.get('dates').split(',')
+                if dates_param[0] != '':
+                    transfers = transfers.filter(date__range=dates_param)
                     print(dates_param)
-                params.pop('dates') 
-            for key in params:
-                params[key] = params[key][0]
-            print(params)
+                params.pop('dates')
+            print('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa')
+            #for key in params:
+                #params[key] = params[key][0]
+            #print(params)
             transfers = transfers.filter(**params)
+            
+            print('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa')
+            
             for transfer in transfers:
                 serializer = TransferCarpetSerializers(transfer)
                 data.append(serializer.data)
@@ -402,3 +382,13 @@ class TransferCarpet2(ListAPIView):
 # }
 
 # Test.objects.filter(**filters)
+
+
+class TestCreateTransfer(CreateAPIView):
+    queryset = Transfer.objects.all()
+    serializer_class = TransferSerializer
+
+    def perform_create(self, serializer):
+        # Add a print statement to debug
+        print("Performing create operation")
+        serializer.save()

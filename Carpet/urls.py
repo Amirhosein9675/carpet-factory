@@ -19,6 +19,9 @@ urlpatterns = [
     path('transfer/update/<int:pk>/', UpdateTransferByDRF.as_view()),
     path('transfer/filter-carpet/', TransferCarpet.as_view()),
     path('transfer/transfer-/', UpdateTransferByDRF.as_view()),
+    
+    path('transfer/create-transfer2/', TestCreateTransfer.as_view()),
+    
 
     path('status/all-status-list/', GetStatus.as_view()),
 
