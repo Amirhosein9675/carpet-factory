@@ -14,13 +14,18 @@ urlpatterns = [
 
 
     path('transfer/create-transfer/', PostTransfer.as_view()),
-    path('transfer/all-transfer-list/', GetTransfer.as_view()),
+    path('transfer/all-transfer-list/', TransferCarpet.as_view()),
     path('transfer/update-transfer/', UpdateTransfer.as_view()),
     path('transfer/update/<int:pk>/', UpdateTransferByDRF.as_view()),
     path('transfer/filter-carpet/', TransferCarpet.as_view()),
     path('transfer/transfer-/', UpdateTransferByDRF.as_view()),
     
     path('transfer/create-transfer2/', TestCreateTransfer.as_view()),
+    path('transfer/update-transfer2/<int:pk>/', TestTransferUpdateView.as_view()),
+    
+    path('transfer/update-transfer2/<int:pk>/partial-update/', TransferPartialUpdateView.as_view()),
+    
+    
     
 
     path('status/all-status-list/', GetStatus.as_view()),
@@ -43,8 +48,9 @@ urlpatterns = [
 
 
 
-    path('services/all-services-list/',
-         GetServices.as_view(), name='getservices'),
+    path('services/all-services-list/',GetServices.as_view(), name='getservices'),
+    path('services/create-services/',ServiceCreate.as_view(), ),
+     
     
     path('api/account/user/', CustomUserDetailsView.as_view(), name='user-details'),
 

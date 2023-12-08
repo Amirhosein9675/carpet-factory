@@ -16,9 +16,9 @@ class Service(models.Model):
 class ServiceProviders(models.Model):
     first_name = models.CharField(max_length=256, blank=False, null=False)
     last_name = models.CharField(max_length=256, blank=False, null=False)
-    phone_number = models.BigIntegerField(null=False, blank=False)
+    phone_number = models.CharField(max_length=256,null=False, blank=False)
     address = models.TextField(null=True, blank=True)
-    national_code = models.BigIntegerField(null=True, blank=True)
+    national_code = models.CharField(max_length=256,null=True, blank=True)
     services = models.ManyToManyField(Service)
 
     def __str__(self) -> str:

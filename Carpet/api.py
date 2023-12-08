@@ -68,15 +68,15 @@ class ServiceproviderCreate(APIView):
                     return Response({'status': f'key {item} is wrong'}, status=status.HTTP_400_BAD_REQUEST)
             service_p = ServiceProviders()
             service_p.first_name = request.data['first_name']
-            service_p.last_name = request.data['first_name']
+            service_p.last_name = request.data['last_name']
             service_p.phone_number = request.data['phone_number']
             service_p.address = request.data['address']
             service_p.national_code = request.data['national_code']
             service_p.save()
-            # if len(request.data['services']) > 0:
-            if len(json.loads(request.data['services'])) > 0:
-                # list_services = request.data['services']
-                list_services = json.loads(request.data['services'])
+            if len(request.data['services']) > 0:
+                # if len(json.loads(request.data['services'])) > 0:
+                list_services = request.data['services']
+                # list_services = json.loads(request.data['services'])
                 for services_item in list_services:
                     service = Service.objects.get(id=services_item)
                     service_p.services.add(service)
@@ -302,6 +302,11 @@ class DriverCreate(CreateAPIView):
     serializer_class = DriverListSerializer
 
 
+class ServiceCreate(CreateAPIView):
+    queryset = Service.objects.all()
+    serializer_class = ServiceSerializer
+
+
 class TransferCarpet(APIView):
     def get(self, request, *args, **kwargs):
         try:
@@ -309,45 +314,47 @@ class TransferCarpet(APIView):
             transfers = Transfer.objects.all()
             print(len(request.query_params))
             print(dict(request.GET))
-            #services_param = request.query_params.get('services').split(',')
-            #print(len(services_param))
-            params = dict(request.GET)
-            #print(params['services'])
-            if "services" in params.keys():
-                services_param = request.query_params.get(
-                    'services').split(',')
-                if services_param[0] != '':
-                    for service in services_param:
-                        transfers = transfers.filter(services=service)
-                print(params['services'])
-                print(services_param)
-                params.pop('services')
-            if "carpets" in params.keys():
-                carpets_barcode_params = request.query_params.get(
-                    'carpets').split(',')
-                if carpets_barcode_params[0] != '':
-                    for carpet_barcode in carpets_barcode_params:
-                        transfers = transfers.filter(
-                            carpets__barcode=carpet_barcode)
-                print(params['carpets'])
-                print(carpets_barcode_params)
-                params.pop('carpets')
-            if "dates" in params.keys():
-                dates_param = request.query_params.get('dates').split(',')
-                if dates_param[0] != '':
-                    transfers = transfers.filter(date__range=dates_param)
-                    print(dates_param)
-                params.pop('dates')
-            print('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa')
-            #for key in params:
-                #params[key] = params[key][0]
-            #print(params)
-            transfers = transfers.filter(**params)
-            
-            print('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa')
-            
+            # services_param = request.query_params.get('services').split(',')
+            # print(len(services_param))
+            if len(request.query_params) > 0:
+                params = dict(request.GET)
+                # print(params['services'])
+                if "services" in params.keys():
+                    services_param = request.query_params.get(
+                        'services').split(',')
+                    if services_param[0] != '':
+                        for service in services_param:
+                            transfers = transfers.filter(services=service)
+                    print(params['services'])
+                    print(services_param)
+                    params.pop('services')
+                if "carpets" in params.keys():
+                    carpets_barcode_params = request.query_params.get(
+                        'carpets').split(',')
+                    if carpets_barcode_params[0] != '':
+                        for carpet_barcode in carpets_barcode_params:
+                            transfers = transfers.filter(
+                                carpets__barcode=carpet_barcode)
+                    print(params['carpets'])
+                    print(carpets_barcode_params)
+                    params.pop('carpets')
+                if "dates" in params.keys():
+                    dates_param = request.query_params.get('dates').split(',')
+                    if dates_param[0] != '':
+                        transfers = transfers.filter(date__range=dates_param)
+                        print(dates_param)
+                    params.pop('dates')
+
+                for key in params:
+                    params[key] = params[key][0]
+                print(params)
+                transfers = transfers.filter(**params)
+
             for transfer in transfers:
-                serializer = TransferCarpetSerializers(transfer)
+                print(transfer)
+
+                serializer = GetTransferSerializers(transfer)
+                print(serializer.data)
                 data.append(serializer.data)
             return Response({'data': data}, status=status.HTTP_200_OK)
 
@@ -387,8 +394,109 @@ class TransferCarpet2(ListAPIView):
 class TestCreateTransfer(CreateAPIView):
     queryset = Transfer.objects.all()
     serializer_class = TransferSerializer
+    print(serializer_class.data)
 
-    def perform_create(self, serializer):
-        # Add a print statement to debug
-        print("Performing create operation")
+    # def perform_create(self, serializer):
+    #     # Add a print statement to debug
+    #     print("Performing create operation")
+    #     serializer.save()
+
+
+class TestTransferUpdateView(UpdateAPIView):
+    queryset = Transfer.objects.all()
+    serializer_class = TransferSerializer
+
+    def update(self, request, *args, **kwargs):
+        partial = kwargs.pop('partial', False)
+        instance = self.get_object()
+        serializer = self.get_serializer(
+            instance, data=request.data, partial=partial)
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+        return Response(serializer.data)
+
+    def perform_update(self, serializer):
         serializer.save()
+        
+
+# class TransferPartialUpdateView(APIView):
+#     def patch(self, request, pk):
+#         transfer = Transfer.objects.get(pk=pk)
+#         serializer = TransferSerializer(transfer, data=request.data, partial=True)
+#         if serializer.is_valid():
+#             serializer.save()
+#             return Response(serializer.data)
+#         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class TransferPartialUpdateView(APIView):
+    def patch(self, request, pk):
+        transfer = Transfer.objects.get(pk=pk)
+        serializer =TransferPartialUpdateSerializer(transfer, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    
+    
+    
+    
+    
+class TransferCarpet2(APIView):
+    pagination_class = CustomPagination
+    def get(self, request, *args, **kwargs):
+        try:
+            data = []
+            transfers = Transfer.objects.all()
+            print(len(request.query_params))
+            print(dict(request.GET))
+            # services_param = request.query_params.get('services').split(',')
+            # print(len(services_param))
+            if len(request.query_params) > 0:
+                params = dict(request.GET)
+                # print(params['services'])
+                if "services" in params.keys():
+                    services_param = request.query_params.get(
+                        'services').split(',')
+                    if services_param[0] != '':
+                        for service in services_param:
+                            transfers = transfers.filter(services=service)
+                    print(params['services'])
+                    print(services_param)
+                    params.pop('services')
+                if "carpets" in params.keys():
+                    carpets_barcode_params = request.query_params.get(
+                        'carpets').split(',')
+                    if carpets_barcode_params[0] != '':
+                        for carpet_barcode in carpets_barcode_params:
+                            transfers = transfers.filter(
+                                carpets__barcode=carpet_barcode)
+                    print(params['carpets'])
+                    print(carpets_barcode_params)
+                    params.pop('carpets')
+                if "dates" in params.keys():
+                    dates_param = request.query_params.get('dates').split(',')
+                    if dates_param[0] != '':
+                        transfers = transfers.filter(date__range=dates_param)
+                        print(dates_param)
+                    params.pop('dates')
+
+                for key in params:
+                    params[key] = params[key][0]
+                print(params)
+                transfers = transfers.filter(**params)
+                
+                
+            paginator = self.pagination_class()
+            paginated_transfers = paginator.paginate_queryset(transfers, request)
+
+            for transfer in paginated_transfers:
+                print(transfer)
+
+                serializer = GetTransferSerializers(transfer)
+                print(serializer.data)
+                data.append(serializer.data)
+            return paginator.get_paginated_response({'data': data})
+
+        except:
+            return Response({'status': 'internal server error'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
