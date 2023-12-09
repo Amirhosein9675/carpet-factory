@@ -14,7 +14,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 
 
 class CustomPagination(pagination.PageNumberPagination):
-    page_size = 2
+    page_size = 10
     page = 1
     page_size_query_param = 'page_size'
     max_page_size = 50
@@ -66,6 +66,17 @@ class ServiceproviderCreate(APIView):
             for item in list(request.data.keys()):
                 if item not in ['first_name', 'last_name', 'phone_number', 'address', 'national_code', 'services']:
                     return Response({'status': f'key {item} is wrong'}, status=status.HTTP_400_BAD_REQUEST)
+
+            existing_record = ServiceProviders.objects.filter(
+                national_code=request.data['national_code'] or '',
+                phone_number=request.data['phone_number'] or ''
+            ).first()
+            print(existing_record)
+
+            if existing_record:
+                return Response({'status': 'Record with the same national_code or phone_number already exists'},
+                                status=status.HTTP_400_BAD_REQUEST)
+
             service_p = ServiceProviders()
             service_p.first_name = request.data['first_name']
             service_p.last_name = request.data['last_name']
@@ -394,7 +405,6 @@ class TransferCarpet2(ListAPIView):
 class TestCreateTransfer(CreateAPIView):
     queryset = Transfer.objects.all()
     serializer_class = TransferSerializer
-    print(serializer_class.data)
 
     # def perform_create(self, serializer):
     #     # Add a print statement to debug
@@ -417,86 +427,143 @@ class TestTransferUpdateView(UpdateAPIView):
 
     def perform_update(self, serializer):
         serializer.save()
-        
 
-# class TransferPartialUpdateView(APIView):
-#     def patch(self, request, pk):
-#         transfer = Transfer.objects.get(pk=pk)
-#         serializer = TransferSerializer(transfer, data=request.data, partial=True)
-#         if serializer.is_valid():
-#             serializer.save()
-#             return Response(serializer.data)
-#         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class TransferPartialUpdateView(APIView):
     def patch(self, request, pk):
         transfer = Transfer.objects.get(pk=pk)
-        serializer =TransferPartialUpdateSerializer(transfer, data=request.data, partial=True)
+        serializer = TransferPartialUpdateSerializer(
+            transfer, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    
-    
-    
-    
-    
-    
-class TransferCarpet2(APIView):
+
+
+# class TransferListAPIView(ListAPIView):
+#     serializer_class = TransferSerializer
+#     queryset = Transfer.objects.all()
+#     pagination_class = CustomPagination  # Use your custom pagination class
+
+#     def get_queryset(self):
+#         class TransferManager(models.Manager):
+#             def filter_transfers(manager_self, status=None, service_provider=None, worker=None, carpets=None, services=None, start_date=None, end_date=None):
+#                 filters = {}
+#                 if status is not None:
+#                     filters['status'] = status
+#                 if service_provider is not None:
+#                     filters['service_provider'] = service_provider
+#                 if worker is not None:
+#                     filters['worker'] = worker
+#                 if carpets is not None:
+#                     filters['carpets__in'] = carpets
+#                 if services is not None:
+#                     filters['services__id__exact'] = services
+#                 if start_date is not None:
+#                     filters['date__gte'] = start_date
+#                 if end_date is not None:
+#                     filters['date__lte'] = end_date
+
+#                 return Transfer.objects.filter(**filters)
+
+#         manager = TransferManager()
+
+#         # Get parameters from the request
+#         status = self.request.query_params.get('status', None)
+#         service_provider = self.request.query_params.get('service_provider', None)
+#         worker = self.request.query_params.get('worker', None)
+#         carpets = self.request.query_params.getlist('carpets', None)
+#         services = self.request.query_params.getlist('services', None)
+#         start_date = self.request.query_params.get('start_date', None)
+#         end_date = self.request.query_params.get('end_date', None)
+
+#         # Convert carpet and service IDs to actual objects
+#         carpet_objects = models.Carpet.objects.filter(id__in=carpets) if carpets else None
+#         service_objects = models.Service.objects.filter(id__in=services) if services else None
+
+#         # Filter transfers based on parameters
+#         queryset = manager.filter_transfers(
+#             status=status,
+#             service_provider=service_provider,
+#             worker=worker,
+#             carpets=carpet_objects,
+#             services=service_objects,
+#             start_date=start_date,
+#             end_date=end_date
+#         )
+
+#         return queryset
+
+
+class TransferManager(models.Manager):
+    def filter_transfers(manager_self, status=None, service_provider=None, worker=None, carpets=None, services=None, start_date=None, end_date=None):
+        filters = {}
+        if status is not None:
+            filters['status'] = status
+        if service_provider is not None:
+            filters['service_provider'] = service_provider
+        if worker is not None:
+            filters['worker'] = worker
+        if carpets is not None:
+            carpet_ids = [int(carpet_id) for carpet_id in carpets]
+            filters['carpets__id__in'] = carpet_ids
+        if services is not None:
+            service_ids = [int(service_id)
+                           for service_id in services.split(',')]
+            filters['services__id__exact'] = service_ids
+        if start_date is not None:
+            filters['date__gte'] = start_date
+        if end_date is not None:
+            filters['date__lte'] = end_date
+
+        return Transfer.objects.filter(**filters)
+
+
+class TransferListAPIView(ListAPIView):
+    serializer_class = TransferSerializer1
+    queryset = Transfer.objects.all()
     pagination_class = CustomPagination
-    def get(self, request, *args, **kwargs):
-        try:
-            data = []
-            transfers = Transfer.objects.all()
-            print(len(request.query_params))
-            print(dict(request.GET))
-            # services_param = request.query_params.get('services').split(',')
-            # print(len(services_param))
-            if len(request.query_params) > 0:
-                params = dict(request.GET)
-                # print(params['services'])
-                if "services" in params.keys():
-                    services_param = request.query_params.get(
-                        'services').split(',')
-                    if services_param[0] != '':
-                        for service in services_param:
-                            transfers = transfers.filter(services=service)
-                    print(params['services'])
-                    print(services_param)
-                    params.pop('services')
-                if "carpets" in params.keys():
-                    carpets_barcode_params = request.query_params.get(
-                        'carpets').split(',')
-                    if carpets_barcode_params[0] != '':
-                        for carpet_barcode in carpets_barcode_params:
-                            transfers = transfers.filter(
-                                carpets__barcode=carpet_barcode)
-                    print(params['carpets'])
-                    print(carpets_barcode_params)
-                    params.pop('carpets')
-                if "dates" in params.keys():
-                    dates_param = request.query_params.get('dates').split(',')
-                    if dates_param[0] != '':
-                        transfers = transfers.filter(date__range=dates_param)
-                        print(dates_param)
-                    params.pop('dates')
 
-                for key in params:
-                    params[key] = params[key][0]
-                print(params)
-                transfers = transfers.filter(**params)
-                
-                
-            paginator = self.pagination_class()
-            paginated_transfers = paginator.paginate_queryset(transfers, request)
+    def get_queryset(self):
+        manager = TransferManager()
 
-            for transfer in paginated_transfers:
-                print(transfer)
+        # Get parameters from the request
+        status = self.request.query_params.get('status', None)
+        service_provider = self.request.query_params.get(
+            'service_provider', None)
+        worker = self.request.query_params.get('worker', None)
+        carpets_param = self.request.query_params.get('carpets', None)
+        services = self.request.query_params.get('services', None)
+        start_date = self.request.query_params.get('start_date', None)
+        end_date = self.request.query_params.get('end_date', None)
 
-                serializer = GetTransferSerializers(transfer)
-                print(serializer.data)
-                data.append(serializer.data)
-            return paginator.get_paginated_response({'data': data})
+        # Check if only date is provided (e.g., '2023-12-09')
+        if end_date and len(end_date) == 10:
+            end_date += "T23:59:59"
 
-        except:
-            return Response({'status': 'internal server error'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        print(f"Received start_date: {start_date}, end_date: {end_date}")
+
+        # Convert carpet and service IDs to actual objects
+
+        carpet_ids = [int(carpet_id) for carpet_id in carpets_param.split(
+            ',')] if carpets_param else []
+        print(type(carpet_ids))
+        print(80*'-')
+        carpet_objects = Carpet.objects.filter(id__in=carpet_ids)
+        print(carpet_objects)
+        service_ids = [int(service_id)
+                       for service_id in services.split(',')] if services else []
+        service_objects = Service.objects.filter(id__in=service_ids)
+
+        # Filter transfers based on parameters
+        queryset = manager.filter_transfers(
+            status=status,
+            service_provider=service_provider,
+            worker=worker,
+            carpets=carpet_objects,
+            services=service_objects,
+            start_date=start_date,
+            end_date=end_date
+        )
+
+        return queryset

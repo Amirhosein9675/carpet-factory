@@ -254,24 +254,7 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class TransferSerializer(serializers.ModelSerializer):
-    # carpets = serializers.PrimaryKeyRelatedField(
-    #     many=True, queryset=Carpet.objects.all())
-    # status = serializers.PrimaryKeyRelatedField(
-    #     queryset=Status.objects.all(), allow_null=True, required=False)
-    # service_provider = serializers.PrimaryKeyRelatedField(
-    #     queryset=ServiceProviders.objects.all(), allow_null=True, required=False)
-    # services = serializers.PrimaryKeyRelatedField(
-    #     many=True, queryset=Service.objects.all())
-    # worker = serializers.PrimaryKeyRelatedField(
-    #     queryset=User.objects.all(), allow_null=True, required=False)
-    
-    # class TransferSerializer(serializers.ModelSerializer):
-    #     carpets = serializers.ListField(child=serializers.IntegerField(), write_only=True, required=False)
-    #     status = serializers.PrimaryKeyRelatedField(queryset=Status.objects.all(), allow_null=True, required=False)
-    #     service_provider = serializers.PrimaryKeyRelatedField(queryset=ServiceProviders.objects.all(), allow_null=True, required=False)
-    #     services = serializers.ListField(child=serializers.IntegerField(), write_only=True, required=False)
-    #     worker = serializers.PrimaryKeyRelatedField(queryset=User.objects.all(), allow_null=True, required=False)
-     
+   
         carpets = serializers.PrimaryKeyRelatedField(many=True, queryset=Carpet.objects.all(), required=False)
         status = serializers.PrimaryKeyRelatedField(queryset=Status.objects.all(), allow_null=True, required=False)
         service_provider = serializers.PrimaryKeyRelatedField(queryset=ServiceProviders.objects.all(), allow_null=True, required=False)
@@ -283,28 +266,7 @@ class TransferSerializer(serializers.ModelSerializer):
             model = Transfer
             fields = '__all__'
     
-        # def to_internal_value(self, data):
-        #     data_dict = dict(data)
-        #     data_dict['carpets'] = [int(carpet_id) for carpet_id in data_dict.get('carpets', []) if carpet_id]
-        #     data_dict['services'] = [int(service_id) for service_id in data_dict.get('services', []) if service_id]
-        #     return super().to_internal_value(data_dict)
         
-    # def validate(self, data):
-    #     # Handle empty lists for carpets and services
-    #     data['carpets'] = data.get('carpets', [])
-    #     data['services'] = data.get('services', [])
-    #     return data
-
-    # def to_internal_value(self, data):
-    #     import json
-    #     print(80*'-')
-    #     data_dict = dict(data)
-    #     data_dict['carpets'] = [int(carpet_id)
-    #                        for carpet_id in json.loads(data.get('carpets'))]
-    #     data_dict['services'] = [int(service_id)
-    #                         for service_id in json.loads(data.get('services'))]
-
-    #     return super().to_internal_value(data_dict)
 class TransferPartialUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Transfer
@@ -327,3 +289,8 @@ class TransferPartialUpdateSerializer(serializers.ModelSerializer):
 
         instance.save()
         return instance
+
+class TransferSerializer1(serializers.ModelSerializer):
+    class Meta:
+        model = Transfer
+        fields = '__all__'

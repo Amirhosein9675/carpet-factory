@@ -14,11 +14,16 @@ urlpatterns = [
 
 
     path('transfer/create-transfer/', PostTransfer.as_view()),
-    path('transfer/all-transfer-list/', TransferCarpet.as_view()),
+    #path('transfer/all-transfer-list/', TransferCarpet.as_view()),
     path('transfer/update-transfer/', UpdateTransfer.as_view()),
     path('transfer/update/<int:pk>/', UpdateTransferByDRF.as_view()),
     path('transfer/filter-carpet/', TransferCarpet.as_view()),
     path('transfer/transfer-/', UpdateTransferByDRF.as_view()),
+    
+    path('transfer/all-transfer-list/', TransferListAPIView.as_view()),
+    
+    
+    
     
     path('transfer/create-transfer2/', TestCreateTransfer.as_view()),
     path('transfer/update-transfer2/<int:pk>/', TestTransferUpdateView.as_view()),
