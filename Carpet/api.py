@@ -311,6 +311,24 @@ class DriverList(ListAPIView):
 class DriverCreate(CreateAPIView):
     queryset = Driver.objects.all()
     serializer_class = DriverListSerializer
+    
+    def validate_phone_number(self, value):
+        # Check if a driver with the same phone number already exists
+        if Driver.objects.filter(phone_number=value).exists():
+            raise serializers.ValidationError("A driver with this phone number already exists.")
+        return value
+
+    def validate_national_code(self, value):
+        # Check if a driver with the same national code already exists
+        if Driver.objects.filter(national_code=value).exists():
+            raise serializers.ValidationError("A driver with this national code already exists.")
+        return value
+
+    def validate_car_number(self, value):
+        # Check if a driver with the same car number already exists
+        if Driver.objects.filter(car_number=value).exists():
+            raise serializers.ValidationError("A driver with this car number already exists.")
+        return value
 
 
 class ServiceCreate(CreateAPIView):
@@ -496,23 +514,35 @@ class TransferPartialUpdateView(APIView):
 
 
 class TransferManager(models.Manager):
-    def filter_transfers(manager_self, status=None, service_provider=None, worker=None, carpets=None, services=None, start_date=None, end_date=None):
+    def filter_transfers(self, status=None, service_provider=None, worker=None, carpets=None, services=None, start_date=None, end_date=None):
         filters = {}
+
         if status is not None:
             filters['status'] = status
+
         if service_provider is not None:
             filters['service_provider'] = service_provider
+
         if worker is not None:
             filters['worker'] = worker
+
         if carpets is not None:
-            carpet_ids = [int(carpet_id) for carpet_id in carpets]
-            filters['carpets__id__in'] = carpet_ids
+            try:
+                carpet_ids = [int(carpet_id) for carpet_id in carpets.split(',')]
+                filters['carpets__id__in'] = carpet_ids
+            except ValueError:
+                raise Http404("Invalid carpet ID provided.")
+
         if services is not None:
-            service_ids = [int(service_id)
-                           for service_id in services.split(',')]
-            filters['services__id__exact'] = service_ids
+            try:
+                service_ids = [int(service_id) for service_id in services.split(',')]
+                filters['services__id__in'] = service_ids
+            except ValueError:
+                raise Http404("Invalid service ID provided.")
+
         if start_date is not None:
             filters['date__gte'] = start_date
+
         if end_date is not None:
             filters['date__lte'] = end_date
 
@@ -520,7 +550,7 @@ class TransferManager(models.Manager):
 
 
 class TransferListAPIView(ListAPIView):
-    serializer_class = TransferSerializer1
+    serializer_class = TransferSerializer
     queryset = Transfer.objects.all()
     pagination_class = CustomPagination
 
@@ -529,41 +559,29 @@ class TransferListAPIView(ListAPIView):
 
         # Get parameters from the request
         status = self.request.query_params.get('status', None)
-        service_provider = self.request.query_params.get(
-            'service_provider', None)
+        service_provider = self.request.query_params.get('service_provider', None)
         worker = self.request.query_params.get('worker', None)
-        carpets_param = self.request.query_params.get('carpets', None)
+        carpets = self.request.query_params.get('carpets', None)
         services = self.request.query_params.get('services', None)
         start_date = self.request.query_params.get('start_date', None)
         end_date = self.request.query_params.get('end_date', None)
 
-        # Check if only date is provided (e.g., '2023-12-09')
+        # Set the default end time to 23:59:59 if end_date is provided without time
         if end_date and len(end_date) == 10:
             end_date += "T23:59:59"
 
-        print(f"Received start_date: {start_date}, end_date: {end_date}")
-
-        # Convert carpet and service IDs to actual objects
-
-        carpet_ids = [int(carpet_id) for carpet_id in carpets_param.split(
-            ',')] if carpets_param else []
-        print(type(carpet_ids))
-        print(80*'-')
-        carpet_objects = Carpet.objects.filter(id__in=carpet_ids)
-        print(carpet_objects)
-        service_ids = [int(service_id)
-                       for service_id in services.split(',')] if services else []
-        service_objects = Service.objects.filter(id__in=service_ids)
-
         # Filter transfers based on parameters
-        queryset = manager.filter_transfers(
-            status=status,
-            service_provider=service_provider,
-            worker=worker,
-            carpets=carpet_objects,
-            services=service_objects,
-            start_date=start_date,
-            end_date=end_date
-        )
+        try:
+            queryset = manager.filter_transfers(
+                status=status,
+                service_provider=service_provider,
+                worker=worker,
+                carpets=carpets,
+                services=services,
+                start_date=start_date,
+                end_date=end_date
+            )
+        except Http404 as e:
+            return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
         return queryset

@@ -136,6 +136,24 @@ class DriverListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Driver
         fields = "__all__"
+    
+    def validate_phone_number(self, value):
+        # Check if a driver with the same phone number already exists
+        if Driver.objects.filter(phone_number=value).exists():
+            raise serializers.ValidationError("A driver with this phone number already exists.")
+        return value
+
+    def validate_national_code(self, value):
+        # Check if a driver with the same national code already exists
+        if Driver.objects.filter(national_code=value).exists():
+            raise serializers.ValidationError("A driver with this national code already exists.")
+        return value
+
+    def validate_car_number(self, value):
+        # Check if a driver with the same car number already exists
+        if Driver.objects.filter(car_number=value).exists():
+            raise serializers.ValidationError("A driver with this car number already exists.")
+        return value
 
 
 class Services_pSerializer(serializers.ModelSerializer):
@@ -245,6 +263,12 @@ class ServiceSerializer(serializers.ModelSerializer):
     class Meta:
         model = Service
         fields = '__all__'
+        
+    def validate_title(self, value):
+        
+        if Service.objects.filter(title=value).exists():
+            raise serializers.ValidationError("A Service with this title already exists.")
+        return value
 
 
 class UserSerializer(serializers.ModelSerializer):
