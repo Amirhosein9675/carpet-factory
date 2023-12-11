@@ -28,8 +28,8 @@ class ServiceProviders(models.Model):
 class Driver(models.Model):
     first_name = models.CharField(max_length=256, blank=False, null=False)
     last_name = models.CharField(max_length=256, blank=False, null=False)
-    phone_number = models.BigIntegerField(null=False, blank=False)
-    national_code = models.BigIntegerField(null=True, blank=True)
+    phone_number = models.CharField(max_length=256,null=False, blank=False)
+    national_code = models.CharField(max_length=256,null=True, blank=True)
     car = models.CharField(max_length=256, null=True, blank=True)
     car_number = models.CharField(max_length=256, blank=True, null=True)
 
@@ -45,8 +45,8 @@ class Carpet(models.Model):
     color = models.CharField(max_length=128)
     costumer_name = models.CharField(max_length=256, null=True, blank=True)
 
-    def __str__(self):
-        return str(self.id)
+    def __str__(self) -> str:
+        return str(self.barcode)
 
 
 class Status(models.Model):
@@ -78,10 +78,4 @@ class Transfer(models.Model):
             
             
 
-    # @property
-    # def valid_services(self):
-    #     valid_services = []
-    #     for service in self.services:
-    #         if service in self.service_privider['services']:
-    #             valid_services.append(service)
-    #     return valid_services
+  

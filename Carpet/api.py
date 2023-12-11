@@ -61,7 +61,7 @@ class ServiceproviderList(ListAPIView):
 
 
 class ServiceproviderCreate(APIView):
-    def post(self, request, format=None):
+     def post(self, request, format=None):
         try:
             for item in list(request.data.keys()):
                 if item not in ['first_name', 'last_name', 'phone_number', 'address', 'national_code', 'services']:
@@ -84,10 +84,10 @@ class ServiceproviderCreate(APIView):
             service_p.address = request.data['address']
             service_p.national_code = request.data['national_code']
             service_p.save()
-            if len(request.data['services']) > 0:
-                # if len(json.loads(request.data['services'])) > 0:
-                list_services = request.data['services']
-                # list_services = json.loads(request.data['services'])
+            #if len(request.data['services']) > 0:
+            if len(json.loads(request.data['services'])) > 0:
+                #list_services = request.data['services']
+                list_services = json.loads(request.data['services'])
                 for services_item in list_services:
                     service = Service.objects.get(id=services_item)
                     service_p.services.add(service)
@@ -96,8 +96,8 @@ class ServiceproviderCreate(APIView):
             return Response({'status': 'ok'}, status=status.HTTP_200_OK)
         except:
             return Response({'status': 'internal server error'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-
+    
+    
 class GetCarpet(ListAPIView):
     queryset = Carpet.objects.all()
     serializer_class = GetCarpetSerializer
