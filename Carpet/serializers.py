@@ -16,11 +16,13 @@ class RegisterUserSerializer(serializers.Serializer):
         required=True, max_length=128, allow_null=False, allow_blank=False)
     is_staff = serializers.BooleanField(required=True)
 
+
 class GetUserListSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
         fields = "__all__"
+
 
 class GetUserDetailSerializer(serializers.ModelSerializer):
 
@@ -29,11 +31,13 @@ class GetUserDetailSerializer(serializers.ModelSerializer):
         fields = ['id', 'username', 'first_name',
                   'last_name', 'is_staff', 'is_active', 'email']
 
+
 class GetServicesSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Service
-        fields = "__all__"  
+        fields = "__all__"
+
 
 class ServiceSerializer(serializers.ModelSerializer):
     class Meta:
@@ -47,17 +51,20 @@ class ServiceSerializer(serializers.ModelSerializer):
                 "A Service with this title already exists.")
         return value
 
+
 class GetCarpetSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Carpet
         fields = "__all__"
-        
+
+
 class CarpetDetailSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Carpet
         fields = "__all__"
+
 
 class GetServiceProviderSerializer(serializers.ModelSerializer):
 
@@ -70,18 +77,20 @@ class GetServiceProviderSerializer(serializers.ModelSerializer):
             service_obj['title'] = service.title
             data.append(service_obj)
         return data
-    
+
     services = serializers.SerializerMethodField("get_services")
 
     class Meta:
         model = ServiceProviders
         fields = ['id', 'first_name', 'last_name', 'services']
 
+
 class DriverListSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Driver
         fields = "__all__"
+
     def validate_phone_number(self, value):
         # Check if a driver with the same phone number already exists
         if Driver.objects.filter(phone_number=value).exists():
@@ -103,11 +112,13 @@ class DriverListSerializer(serializers.ModelSerializer):
                 "A driver with this car number already exists.")
         return value
 
+
 class GetStatusSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Status
         fields = "__all__"
+
 
 class TransferSerializer(serializers.ModelSerializer):
 
@@ -126,7 +137,8 @@ class TransferSerializer(serializers.ModelSerializer):
 
         model = Transfer
         fields = '__all__'
- 
+
+
 class TransferPartialUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Transfer
@@ -148,11 +160,7 @@ class TransferPartialUpdateSerializer(serializers.ModelSerializer):
                 pass
 
         instance.save()
-        return instance       
-
-
-
-#teeeeeest
+        return instance
 
 
 class TransferSerializer1(serializers.ModelSerializer):

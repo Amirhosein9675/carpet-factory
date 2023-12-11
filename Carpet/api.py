@@ -3,7 +3,6 @@ from .models import *
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.generics import ListAPIView, UpdateAPIView, CreateAPIView
-from rest_framework import serializers
 from .serializers import *
 import json
 from django.http import Http404
@@ -203,78 +202,6 @@ class GetStatus(ListAPIView):
     queryset = Status.objects.all()
     serializer_class = GetStatusSerializer
 
-# class TransferManager(models.Manager):
-#     def filter_transfers(self, status=None, service_provider=None, worker=None, carpets=None, services=None, start_date=None, end_date=None):
-#         filters = {}
-
-#         if status is not None:
-#             filters['status'] = status
-
-#         if service_provider is not None:
-#             filters['service_provider'] = service_provider
-
-#         if worker is not None:
-#             filters['worker'] = worker
-
-#         if carpets is not None:
-#             try:
-#                 carpet_ids = [int(carpet_id) for carpet_id in carpets.split(',')]
-#                 filters['carpets__id__in'] = carpet_ids
-#             except ValueError:
-#                 raise Http404("Invalid carpet ID provided.")
-
-#         if services is not None:
-#             try:
-#                 service_ids = [int(service_id) for service_id in services.split(',')]
-#                 filters['services__id__in'] = service_ids
-#             except ValueError:
-#                 raise Http404("Invalid service ID provided.")
-
-#         if start_date is not None:
-#             filters['date__gte'] = start_date
-
-#         if end_date is not None:
-#             filters['date__lte'] = end_date
-
-#         return Transfer.objects.filter(**filters)
-
-# class TransferListAPIView(ListAPIView):
-#     serializer_class = TransferSerializer
-#     queryset = Transfer.objects.all()
-#     pagination_class = CustomPagination
-
-#     def get_queryset(self):
-#         manager = TransferManager()
-
-#         # Get parameters from the request
-#         status = self.request.query_params.get('status', None)
-#         service_provider = self.request.query_params.get('service_provider', None)
-#         worker = self.request.query_params.get('worker', None)
-#         carpets = self.request.query_params.get('carpets', None)
-#         services = self.request.query_params.get('services', None)
-#         start_date = self.request.query_params.get('start_date', None)
-#         end_date = self.request.query_params.get('end_date', None)
-
-#         # Set the default end time to 23:59:59 if end_date is provided without time
-#         if end_date and len(end_date) == 10:
-#             end_date += "T23:59:59"
-
-#         # Filter transfers based on parameters
-#         try:
-#             queryset = manager.filter_transfers(
-#                 status=status,
-#                 service_provider=service_provider,
-#                 worker=worker,
-#                 carpets=carpets,
-#                 services=services,
-#                 start_date=start_date,
-#                 end_date=end_date
-#             )
-#         except Http404 as e:
-#             return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
-
-#         return queryset
-
 
 class TransferPartialUpdateView(APIView):
     def patch(self, request, pk):
@@ -309,11 +236,6 @@ class TestCreateTransfer(CreateAPIView):
     serializer_class = TransferSerializer
 
 
-
-
-# teeeeeeeest
-
-
 class TransferManager(models.Manager):
     def filter_transfers(self, status=None, service_provider=None, worker=None, carpets=None, services=None, start_date=None, end_date=None, **carpet_filters):
         filters = {}
@@ -332,7 +254,7 @@ class TransferManager(models.Manager):
                 carpet_ids = carpets
                 filters['carpets__id__in'] = carpet_ids
             except Http404 as e:
-                raise e  # Propagate the Http404 exception
+                raise e
 
         if services is not None:
             try:
@@ -351,14 +273,9 @@ class TransferManager(models.Manager):
         return Transfer.objects.filter(**filters)
 
     def filter_carpet_ids(self, **carpet_filters):
-        # Initialize with all carpet IDs
-        print(80*'-')
         carpet_ids = Carpet.objects.values_list('id', flat=True)
-        print(carpet_ids)
-        # Add filters for all Carpet model fields
         carpet_fields = [field.name for field in Carpet._meta.get_fields(
         ) if isinstance(field, models.CharField)]
-        print(carpet_fields)
         for field in carpet_fields:
             value = carpet_filters.get(field, None)
             if value is not None:
@@ -367,37 +284,29 @@ class TransferManager(models.Manager):
 
         if not carpet_ids:
             raise Http404("No matching carpet records found.")
-        carpet_ids=list(carpet_ids)
-        #print(type(carpet_ids))
+        carpet_ids = list(carpet_ids)
         return carpet_ids
 
 
 class TransferListAPIView(ListAPIView):
     serializer_class = TransferSerializer1
     queryset = Transfer.objects.all()
-    # You need to define CustomPagination or use another pagination class
     pagination_class = CustomPagination
     manager = TransferManager()
 
     def get_queryset(self):
-        # Get parameters from the request
         status = self.request.query_params.get('status', None)
         service_provider = self.request.query_params.get(
             'service_provider', None)
         worker = self.request.query_params.get('worker', None)
-        # carpets = self.request.query_params.get('carpets', None)
         services = self.request.query_params.get('services', None)
         start_date = self.request.query_params.get('start_date', None)
         end_date = self.request.query_params.get('end_date', None)
-        print(services)
-        # Set the default end time to 23:59:59 if end_date is provided without time
         if end_date and len(end_date) == 10:
             end_date += "T23:59:59"
 
         try:
-            # Instead of directly using carpet IDs, you can use filter_carpet_ids
             carpet_ids = self.manager.filter_carpet_ids(
-                # Add more Carpet model fields as needed
                 factory=self.request.query_params.get('factory', None),
                 barcode=self.request.query_params.get('barcode', None),
                 map_code=self.request.query_params.get('map_code', None),
@@ -410,13 +319,12 @@ class TransferListAPIView(ListAPIView):
                 status=status,
                 service_provider=service_provider,
                 worker=worker,
-                carpets=carpet_ids,  # Use filtered carpet IDs here
+                carpets=carpet_ids,
                 services=services,
                 start_date=start_date,
                 end_date=end_date,
             )
         except Http404 as e:
-            # Correct the attribute here
             return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
         return queryset
