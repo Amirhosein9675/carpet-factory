@@ -270,7 +270,7 @@ class TransferManager(models.Manager):
         if end_date is not None:
             filters['date__lte'] = end_date
 
-        return Transfer.objects.filter(**filters)
+        return Transfer.objects.filter(**filters).distinct()
 
     def filter_carpet_ids(self, **carpet_filters):
         carpet_ids = Carpet.objects.values_list('id', flat=True)

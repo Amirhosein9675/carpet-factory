@@ -39,7 +39,7 @@ class Driver(models.Model):
 
 class Carpet(models.Model):
     factory = models.CharField(max_length=256, null=True, blank=True)
-    barcode = models.BigIntegerField(null=False, blank=False)
+    barcode = models.CharField(max_length=256,null=False, blank=False)
     map_code = models.CharField(max_length=256)
     size = models.CharField(max_length=128)
     color = models.CharField(max_length=128)
