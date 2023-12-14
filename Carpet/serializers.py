@@ -167,3 +167,52 @@ class TransferSerializer1(serializers.ModelSerializer):
     class Meta:
         model = Transfer
         fields = "__all__"
+
+
+class DestroyTransferSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Transfer
+        fields = "__all__"
+
+
+class DestroyCarpetSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Carpet
+        fields = "__all__"
+
+
+class DestroyDriverSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Driver
+        fields = "__all__"
+
+
+class DestroyServiceProvidersSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = ServiceProviders
+        fields = "__all__"
+
+
+class DestroyServiceSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Service
+        fields = "__all__"
+
+
+class DestroyStatusSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Status
+        fields = "__all__"
+
+
+class DestroyUserSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = User
+        fields = "__all__"

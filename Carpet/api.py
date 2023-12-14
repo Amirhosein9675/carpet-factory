@@ -2,7 +2,7 @@ from rest_framework.views import APIView
 from .models import *
 from rest_framework.response import Response
 from rest_framework import status
-from rest_framework.generics import ListAPIView, UpdateAPIView, CreateAPIView
+from rest_framework.generics import ListAPIView, UpdateAPIView, CreateAPIView, DestroyAPIView
 from .serializers import *
 import json
 from django.http import Http404
@@ -328,3 +328,94 @@ class TransferListAPIView(ListAPIView):
             return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
         return queryset
+
+
+class DestroyTransfer(DestroyAPIView):
+    queryset = Transfer.objects.all()
+    serializer_class = TransferSerializer
+
+    def destroy(self, request, *args, **kwargs):
+        try:
+            instance = self.get_object()
+            self.perform_destroy(instance)
+            return Response({"detail":"Object deleted successfully"},status=status.HTTP_204_NO_CONTENT)
+        except Exception as e:
+            return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class DestroyCarpet(DestroyAPIView):
+    queryset = Carpet.objects.all()
+    serializer_class = DestroyCarpetSerializer
+
+    def destroy(self, request, *args, **kwargs):
+        try:
+            instance = self.get_object()
+            self.perform_destroy(instance)
+            return Response({"detail":"Object deleted successfully"},status=status.HTTP_204_NO_CONTENT)
+        except Exception as e:
+            return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class DestroyDriver(DestroyAPIView):
+    queryset = Driver.objects.all()
+    serializer_class = DestroyDriverSerializer
+
+    def destroy(self, request, *args, **kwargs):
+        try:
+            instance = self.get_object()
+            self.perform_destroy(instance)
+            return Response({"detail":"Object deleted successfully"},status=status.HTTP_204_NO_CONTENT)
+        except Exception as e:
+            return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+
+class DestroyServiceProvider(DestroyAPIView):
+    queryset = ServiceProviders.objects.all()
+    serializer_class = DestroyServiceProvidersSerializer
+
+    def destroy(self, request, *args, **kwargs):
+        try:
+            instance = self.get_object()
+            self.perform_destroy(instance)
+            return Response({"detail":"Object deleted successfully"},status=status.HTTP_204_NO_CONTENT)
+        except Exception as e:
+            return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+class DestroyService(DestroyAPIView):
+    queryset = Service.objects.all()
+    serializer_class = DestroyServiceSerializer
+
+    def destroy(self, request, *args, **kwargs):
+        try:
+            instance = self.get_object()
+            self.perform_destroy(instance)
+            return Response({"detail":"Object deleted successfully"},status=status.HTTP_204_NO_CONTENT)
+        except Exception as e:
+            return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class DestroyStatus(DestroyAPIView):
+    queryset = Status.objects.all()
+    serializer_class = DestroyStatusSerializer
+
+    def destroy(self, request, *args, **kwargs):
+        try:
+            instance = self.get_object()
+            self.perform_destroy(instance)
+            return Response({"detail":"Object deleted successfully"},status=status.HTTP_204_NO_CONTENT)
+        except Exception as e:
+            return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class DestroyUser(DestroyAPIView):
+    queryset = User.objects.all()
+    serializer_class = DestroyUserSerializer
+
+    def destroy(self, request, *args, **kwargs):
+        try:
+            instance = self.get_object()
+            self.perform_destroy(instance)
+            return Response({"detail":"Object deleted successfully"},status=status.HTTP_204_NO_CONTENT)
+        except Exception as e:
+            return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
