@@ -1,7 +1,5 @@
 from rest_framework import serializers
 from .models import *
-from dj_rest_auth.serializers import UserDetailsSerializer
-from django.contrib.auth import get_user_model
 
 
 class RegisterUserSerializer(serializers.Serializer):
@@ -215,4 +213,10 @@ class DestroyUserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
+        fields = "__all__"
+
+class AdminVerifyTransferSerializer(serializers.ModelSerializer):
+    
+    class Meta:
+        model = Transfer
         fields = "__all__"
