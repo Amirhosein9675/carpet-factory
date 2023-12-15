@@ -220,3 +220,9 @@ class AdminVerifyTransferSerializer(serializers.ModelSerializer):
     class Meta:
         model = Transfer
         fields = "__all__"
+
+class WorkerTransferSerializer(serializers.ModelSerializer):
+    
+    class Meta:
+        model = Transfer
+        fields = "__all__"

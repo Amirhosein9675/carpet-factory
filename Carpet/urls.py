@@ -45,5 +45,6 @@ urlpatterns = [
     path('transfer/create-transfer2/', TestCreateTransfer.as_view()),
     path('transfer/delete-transfer/<int:pk>/', DestroyTransfer.as_view()),
     path('transfer/admin-verify-transfer/', TransferAdminVerify.as_view()),
+    path('transfer/worker-isfinished-transfer/', WorkerTransfer.as_view()),
 
 ]

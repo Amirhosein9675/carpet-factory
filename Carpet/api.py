@@ -7,8 +7,8 @@ from .serializers import *
 import json
 from django.http import Http404
 from rest_framework import pagination
-from rest_framework.exceptions import NotFound
-import traceback
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.authentication import TokenAuthentication
 
 
 class CustomPagination(pagination.PageNumberPagination):
@@ -431,3 +431,12 @@ class DestroyUser(DestroyAPIView):
 class TransferAdminVerify(ListAPIView):
     serializer_class = AdminVerifyTransferSerializer
     queryset = Transfer.objects.filter(admin_verify=False)
+
+class WorkerTransfer(ListAPIView):
+    serializer_class = WorkerTransferSerializer
+    
+    def get_queryset(self):
+
+        user = self.request.user
+        queryset = Transfer.objects.filter(worker=user, is_finished=False)
+        return queryset
