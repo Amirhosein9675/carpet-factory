@@ -75,6 +75,8 @@ class Transfer(models.Model):
             return "عدم تایید کارگر و ادمین"
         elif self.is_finished == True  and self.admin_verify !=True:
             return "عدم تایید ادمین"
+        else:
+            return"نامشخص"
             
             
 

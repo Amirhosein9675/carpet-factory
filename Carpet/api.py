@@ -7,6 +7,8 @@ from .serializers import *
 import json
 from django.http import Http404
 from rest_framework import pagination
+from rest_framework.exceptions import NotFound
+import traceback
 
 
 class CustomPagination(pagination.PageNumberPagination):
@@ -273,6 +275,10 @@ class TransferManager(models.Manager):
         return Transfer.objects.filter(**filters).distinct()
 
     def filter_carpet_ids(self, **carpet_filters):
+        list_element = list(carpet_filters.values())
+        are_all_none = all(element is None for element in list_element)
+        if are_all_none:
+            return None
         carpet_ids = Carpet.objects.values_list('id', flat=True)
         carpet_fields = [field.name for field in Carpet._meta.get_fields(
         ) if isinstance(field, models.CharField)]
@@ -315,6 +321,7 @@ class TransferListAPIView(ListAPIView):
                 costumer_name=self.request.query_params.get(
                     'costumer_name', None),
             )
+            print(carpet_ids)
             queryset = self.manager.filter_transfers(
                 status=status,
                 service_provider=service_provider,
@@ -338,7 +345,7 @@ class DestroyTransfer(DestroyAPIView):
         try:
             instance = self.get_object()
             self.perform_destroy(instance)
-            return Response({"detail":"Object deleted successfully"},status=status.HTTP_204_NO_CONTENT)
+            return Response({"detail": "Object deleted successfully"}, status=status.HTTP_204_NO_CONTENT)
         except Exception as e:
             return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
@@ -351,7 +358,7 @@ class DestroyCarpet(DestroyAPIView):
         try:
             instance = self.get_object()
             self.perform_destroy(instance)
-            return Response({"detail":"Object deleted successfully"},status=status.HTTP_204_NO_CONTENT)
+            return Response({"detail": "Object deleted successfully"}, status=status.HTTP_204_NO_CONTENT)
         except Exception as e:
             return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
@@ -364,10 +371,9 @@ class DestroyDriver(DestroyAPIView):
         try:
             instance = self.get_object()
             self.perform_destroy(instance)
-            return Response({"detail":"Object deleted successfully"},status=status.HTTP_204_NO_CONTENT)
+            return Response({"detail": "Object deleted successfully"}, status=status.HTTP_204_NO_CONTENT)
         except Exception as e:
             return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
 
 
 class DestroyServiceProvider(DestroyAPIView):
@@ -378,9 +384,10 @@ class DestroyServiceProvider(DestroyAPIView):
         try:
             instance = self.get_object()
             self.perform_destroy(instance)
-            return Response({"detail":"Object deleted successfully"},status=status.HTTP_204_NO_CONTENT)
+            return Response({"detail": "Object deleted successfully"}, status=status.HTTP_204_NO_CONTENT)
         except Exception as e:
             return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
 
 class DestroyService(DestroyAPIView):
     queryset = Service.objects.all()
@@ -390,7 +397,7 @@ class DestroyService(DestroyAPIView):
         try:
             instance = self.get_object()
             self.perform_destroy(instance)
-            return Response({"detail":"Object deleted successfully"},status=status.HTTP_204_NO_CONTENT)
+            return Response({"detail": "Object deleted successfully"}, status=status.HTTP_204_NO_CONTENT)
         except Exception as e:
             return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
@@ -403,7 +410,7 @@ class DestroyStatus(DestroyAPIView):
         try:
             instance = self.get_object()
             self.perform_destroy(instance)
-            return Response({"detail":"Object deleted successfully"},status=status.HTTP_204_NO_CONTENT)
+            return Response({"detail": "Object deleted successfully"}, status=status.HTTP_204_NO_CONTENT)
         except Exception as e:
             return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
@@ -416,6 +423,11 @@ class DestroyUser(DestroyAPIView):
         try:
             instance = self.get_object()
             self.perform_destroy(instance)
-            return Response({"detail":"Object deleted successfully"},status=status.HTTP_204_NO_CONTENT)
+            return Response({"detail": "Object deleted successfully"}, status=status.HTTP_204_NO_CONTENT)
         except Exception as e:
             return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class TransferAdminVerify(ListAPIView):
+    serializer_class = AdminVerifyTransferSerializer
+    queryset = Transfer.objects.filter(admin_verify=False)
