@@ -440,3 +440,93 @@ class WorkerTransfer(ListAPIView):
         user = self.request.user
         queryset = Transfer.objects.filter(worker=user, is_finished=False)
         return queryset
+
+class UserUpdatePatch(APIView):
+    serializer_class = UserUpdatePatchSerializer
+    def patch(self, request, pk, *args, **kwargs):
+        try:
+            user = User.objects.get(pk=pk)
+        except User.DoesNotExist:
+            return Response({"detail": "User not found"}, status=status.HTTP_404_NOT_FOUND)
+        # if request.user != user:
+        #     return Response({"detail": "You do not have permission to update this user"}, status=status.HTTP_403_FORBIDDEN)
+        serializer = self.serializer_class(user, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+
+class StatusUpdatePatch(APIView):
+    serializer_class = StatusUpdatePatchSerializer
+    def patch(self, request, pk, *args, **kwargs):
+        try:
+            status_obj = Status.objects.get(pk=pk)
+        except Status.DoesNotExist:
+            return Response({"detail": "Status not found"}, status=status.HTTP_404_NOT_FOUND)
+
+        serializer = self.serializer_class(status_obj, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class ServiceUpdatePatch(APIView):
+    serializer_class = ServiceUpdatePatchSerializer
+    def patch(self, request, pk, *args, **kwargs):
+        try:
+            service_obj = Service.objects.get(pk=pk)
+        except Service.DoesNotExist:
+            return Response({"detail": "Service not found"}, status=status.HTTP_404_NOT_FOUND)
+
+        serializer = self.serializer_class(service_obj, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class ServiceProviderUpdatePatch(APIView):
+    serializer_class = ServiceProviderUpdatePatchSerializer
+    def patch(self, request, pk, *args, **kwargs):
+        try:
+            service_provider_obj = ServiceProviders.objects.get(pk=pk)
+        except ServiceProviders.DoesNotExist:
+            return Response({"detail": "Service Provider not found"}, status=status.HTTP_404_NOT_FOUND)
+
+        serializer = self.serializer_class(service_provider_obj, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class DriverUpdatePatch(APIView):
+    serializer_class = DriverUpdatePatchSerializer
+    def patch(self, request, pk, *args, **kwargs):
+        try:
+            driver_obj = Driver.objects.get(pk=pk)
+        except Driver.DoesNotExist:
+            return Response({"detail": "Driver not found"}, status=status.HTTP_404_NOT_FOUND)
+        
+        serializer = self.serializer_class(driver_obj, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class CarpetUpdatePatch(APIView):
+    serializer_class = CarpetUpdatePatchSerializer
+    def patch(self, request, pk, *args, **kwargs):
+        try:
+            carpet_obj = Carpet.objects.get(pk=pk)
+        except Carpet.DoesNotExist:
+            return Response({"detail": "Carpet not found"}, status=status.HTTP_404_NOT_FOUND)
+
+        serializer = self.serializer_class(carpet_obj, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+

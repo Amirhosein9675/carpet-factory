@@ -144,17 +144,13 @@ class TransferPartialUpdateSerializer(serializers.ModelSerializer):
 
     def update(self, instance, validated_data):
         for field_name, value in validated_data.items():
-            # Check if the field is a ManyToManyField
             if field_name in [field.name for field in Transfer._meta.get_fields()]:
                 field = getattr(instance, field_name)
-                if hasattr(field, 'add'):  # Check if it's a many-to-many field
-                    # Use add() for ManyToManyField
+                if hasattr(field, 'add'):
                     field.set(value)
                 else:
-                    # For other fields, update directly
                     setattr(instance, field_name, value)
             else:
-                # Handle other fields not defined in the model if needed
                 pass
 
         instance.save()
@@ -215,14 +211,82 @@ class DestroyUserSerializer(serializers.ModelSerializer):
         model = User
         fields = "__all__"
 
+
 class AdminVerifyTransferSerializer(serializers.ModelSerializer):
-    
+
     class Meta:
         model = Transfer
         fields = "__all__"
 
+
 class WorkerTransferSerializer(serializers.ModelSerializer):
-    
+
     class Meta:
         model = Transfer
         fields = "__all__"
+
+
+class UserUpdatePatchSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = User
+        fields = "__all__"
+
+
+class StatusUpdatePatchSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Status
+        fields = "__all__"
+
+class ServiceUpdatePatchSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Service
+        fields = "__all__"
+        
+class ServiceProviderUpdatePatchSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = ServiceProviders
+        fields = "__all__"
+        
+    def validate(self, data):
+        
+        phone_number = data.get('phone_number')
+        if phone_number and ServiceProviders.objects.filter(phone_number=phone_number).exclude(pk=self.instance.pk).exists():
+            raise serializers.ValidationError("Phone number already exists.")
+
+       
+        national_code = data.get('national_code')
+        if national_code and ServiceProviders.objects.filter(national_code=national_code).exclude(pk=self.instance.pk).exists():
+            raise serializers.ValidationError("National code already exists.")
+
+        return data
+
+class DriverUpdatePatchSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Driver
+        fields = "__all__"
+        
+    def validate(self, data):
+    
+        phone_number = data.get('phone_number')
+        if phone_number and Driver.objects.filter(phone_number=phone_number).exclude(pk=self.instance.pk).exists():
+            raise serializers.ValidationError("Phone number already exists.")
+
+        national_code = data.get('national_code')
+        if national_code and Driver.objects.filter(national_code=national_code).exclude(pk=self.instance.pk).exists():
+            raise serializers.ValidationError("National code already exists.")
+        
+        car_number = data.get('car_number')
+        if car_number and Driver.objects.filter(car_number=car_number).exclude(pk=self.instance.pk).exists():
+            raise serializers.ValidationError("Car number already exists.")
+
+        return data
+
+class CarpetUpdatePatchSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Carpet
+        fields = "__all__"
+
