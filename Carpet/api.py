@@ -176,10 +176,10 @@ class ServiceproviderCreate(APIView):
             service_p.address = request.data['address']
             service_p.national_code = request.data['national_code']
             service_p.save()
-            # if len(request.data['services']) > 0:
-            if len(json.loads(request.data['services'])) > 0:
-                # list_services = request.data['services']
-                list_services = json.loads(request.data['services'])
+            if len(request.data['services']) > 0:
+            #if len(json.loads(request.data['services'])) > 0:
+                list_services = request.data['services']
+                #list_services = json.loads(request.data['services'])
                 for services_item in list_services:
                     service = Service.objects.get(id=services_item)
                     service_p.services.add(service)
