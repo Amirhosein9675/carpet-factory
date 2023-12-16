@@ -78,6 +78,13 @@ class Transfer(models.Model):
         else:
             return"نامشخص"
             
-            
+class Statistics(models.Model):
+    service=models.ForeignKey(Service,on_delete=models.CASCADE)
+    kind=models.CharField(max_length=256,blank=False,null=False)
+    size=models.CharField(max_length=256,blank=False,null=False)
+    custom_size=models.IntegerField()
+    
+    def __str__(self) -> str:
+        return self.kind
 
   

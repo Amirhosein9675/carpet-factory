@@ -529,4 +529,28 @@ class CarpetUpdatePatch(APIView):
             return Response(serializer.data, status=status.HTTP_200_OK)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
 
+class StatisticsList(ListAPIView):
+    queryset = Statistics.objects.all()
+    serializer_class = StatisticsListSerializer
+
+class StatisticsCreate(CreateAPIView):
+    queryset = Statistics.objects.all()
+    serializer_class = StatisticsCreateSerializer
+
+class StatisticsUpdate(APIView):
+    serializer_class = StatisticsUpdateSerializer
+    
+    def patch(self, request, pk, *args, **kwargs):
+        try:
+            statistics_obj = Statistics.objects.get(pk=pk)
+        except Statistics.DoesNotExist:
+            return Response({"detail": "Statistics record not found"}, status=status.HTTP_404_NOT_FOUND)
+
+        serializer = self.serializer_class(statistics_obj, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

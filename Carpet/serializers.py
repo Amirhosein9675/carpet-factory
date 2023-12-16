@@ -290,3 +290,21 @@ class CarpetUpdatePatchSerializer(serializers.ModelSerializer):
         model = Carpet
         fields = "__all__"
 
+class StatisticsListSerializer(serializers.ModelSerializer):
+    
+    class Meta:
+        model = Statistics
+        fields = "__all__"
+
+class StatisticsCreateSerializer(serializers.ModelSerializer):
+    
+    class Meta:
+        model = Statistics
+        fields = "__all__"
+
+class StatisticsUpdateSerializer(serializers.ModelSerializer):
+    
+    class Meta:
+        model = Statistics
+        fields = "__all__"
+

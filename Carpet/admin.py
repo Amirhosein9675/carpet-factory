@@ -24,13 +24,13 @@ class StatusAdmin(admin.ModelAdmin):
     list_display = ['title']
 
 
-#class TransferAdmin(admin.ModelAdmin):
-   # list_display = ['is_finished', 'admin_verify']
-
+class StatisticsAdmin(admin.ModelAdmin):
+    list_display = ['service','kind','size','custom_size']
 
 admin.site.register(Service, ServiceAdmin)
 admin.site.register(ServiceProviders, ServiceProviderAdmin)
 admin.site.register(Driver, DriverAdmin)
 admin.site.register(Carpet, CarpetAdmin)
 admin.site.register(Status, StatusAdmin)
-admin.site.register(Transfer) #TransferAdmin)
+admin.site.register(Transfer) 
+admin.site.register(Statistics,StatisticsAdmin)

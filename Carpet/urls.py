@@ -30,8 +30,10 @@ urlpatterns = [
          ServiceproviderList.as_view(), name='getserviceprovider'),
     path('serviceprovider/create-serviceproviders/',
          ServiceproviderCreate.as_view()),
-    path('serviceprovider/delete-serviceprovider/<int:pk>/',DestroyServiceProvider.as_view()),
-    path('serviceprovider/update-serviceprovider/<int:pk>/',ServiceProviderUpdatePatch.as_view()),
+    path('serviceprovider/delete-serviceprovider/<int:pk>/',
+         DestroyServiceProvider.as_view()),
+    path('serviceprovider/update-serviceprovider/<int:pk>/',
+         ServiceProviderUpdatePatch.as_view()),
     # driver urls
     path('driver/all-driver-list/', DriverList.as_view()),
     path('driver/create-driver/', DriverCreate.as_view()),
@@ -51,5 +53,10 @@ urlpatterns = [
     path('transfer/delete-transfer/<int:pk>/', DestroyTransfer.as_view()),
     path('transfer/admin-verify-transfer/', TransferAdminVerify.as_view()),
     path('transfer/worker-isfinished-transfer/', WorkerTransfer.as_view()),
+
+    # Statistics urls
+    path('statistics/all-statistics-list/', StatisticsList.as_view()),
+    path('statistics/create-statistics/', StatisticsCreate.as_view()),
+    path('statistics/update-statistics/<int:pk>/', StatisticsUpdate.as_view()),
 
 ]
