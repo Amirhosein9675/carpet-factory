@@ -92,7 +92,7 @@ class CarpetFromExcel(APIView):
     def post(self, request, format=None):
         try:
             for item in list(request.data.keys()):
-                if item not in ['factory', 'barcode', 'map_code', 'size', 'color', 'costumer_name']:
+                if item not in ['factory', 'barcode', 'map_code', 'size', 'color', 'costumer_name','kind']:
                     return Response({'status': f'key {item} is wrong'}, status=status.HTTP_400_BAD_REQUEST)
             seria = CarpetDetailSerializer(data=request.data)
             if seria.is_valid():
@@ -102,6 +102,7 @@ class CarpetFromExcel(APIView):
                 size = seria.data.get('size')
                 color = seria.data.get('color')
                 costumer_name = seria.data.get('costumer_name')
+                kind=seria.data.get('kind')
             else:
                 return Response({'status': 'bad request serializer not valid'}, status=status.HTTP_400_BAD_REQUEST)
             carpet_new = Carpet()
@@ -111,6 +112,7 @@ class CarpetFromExcel(APIView):
             carpet_new.size = size
             carpet_new.color = color
             carpet_new.costumer_name = costumer_name
+            carpet_new.kind = kind
             carpet_new.save()
 
             return Response({'status': 'carpet object saved successfully'}, status=status.HTTP_200_OK)
