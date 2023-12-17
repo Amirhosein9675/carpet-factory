@@ -80,7 +80,8 @@ class GetServiceProviderSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ServiceProviders
-        fields = ['id', 'first_name', 'last_name', 'services']
+        fields = ['id', 'first_name', 'last_name', 'services',
+                  'phone_number', 'address', 'national_code']
 
 
 class DriverListSerializer(serializers.ModelSerializer):
@@ -109,6 +110,12 @@ class DriverListSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(
                 "A driver with this car number already exists.")
         return value
+
+
+class DriverListSerializer1(serializers.ModelSerializer):
+    class Meta:
+        model = Driver
+        fields = "__all__"
 
 
 class GetStatusSerializer(serializers.ModelSerializer):
@@ -239,38 +246,40 @@ class StatusUpdatePatchSerializer(serializers.ModelSerializer):
         model = Status
         fields = "__all__"
 
+
 class ServiceUpdatePatchSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Service
         fields = "__all__"
-        
+
+
 class ServiceProviderUpdatePatchSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ServiceProviders
         fields = "__all__"
-        
+
     def validate(self, data):
-        
+
         phone_number = data.get('phone_number')
         if phone_number and ServiceProviders.objects.filter(phone_number=phone_number).exclude(pk=self.instance.pk).exists():
             raise serializers.ValidationError("Phone number already exists.")
 
-       
         national_code = data.get('national_code')
         if national_code and ServiceProviders.objects.filter(national_code=national_code).exclude(pk=self.instance.pk).exists():
             raise serializers.ValidationError("National code already exists.")
 
         return data
 
+
 class DriverUpdatePatchSerializer(serializers.ModelSerializer):
     class Meta:
         model = Driver
         fields = "__all__"
-        
+
     def validate(self, data):
-    
+
         phone_number = data.get('phone_number')
         if phone_number and Driver.objects.filter(phone_number=phone_number).exclude(pk=self.instance.pk).exists():
             raise serializers.ValidationError("Phone number already exists.")
@@ -278,33 +287,36 @@ class DriverUpdatePatchSerializer(serializers.ModelSerializer):
         national_code = data.get('national_code')
         if national_code and Driver.objects.filter(national_code=national_code).exclude(pk=self.instance.pk).exists():
             raise serializers.ValidationError("National code already exists.")
-        
+
         car_number = data.get('car_number')
         if car_number and Driver.objects.filter(car_number=car_number).exclude(pk=self.instance.pk).exists():
             raise serializers.ValidationError("Car number already exists.")
 
         return data
 
+
 class CarpetUpdatePatchSerializer(serializers.ModelSerializer):
     class Meta:
         model = Carpet
         fields = "__all__"
 
+
 class StatisticsListSerializer(serializers.ModelSerializer):
-    
+
     class Meta:
         model = Statistics
         fields = "__all__"
+
 
 class StatisticsCreateSerializer(serializers.ModelSerializer):
-    
+
     class Meta:
         model = Statistics
         fields = "__all__"
+
 
 class StatisticsUpdateSerializer(serializers.ModelSerializer):
-    
+
     class Meta:
         model = Statistics
         fields = "__all__"
-

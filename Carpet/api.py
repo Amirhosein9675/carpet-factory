@@ -92,7 +92,7 @@ class CarpetFromExcel(APIView):
     def post(self, request, format=None):
         try:
             for item in list(request.data.keys()):
-                if item not in ['factory', 'barcode', 'map_code', 'size', 'color', 'costumer_name','kind']:
+                if item not in ['factory', 'barcode', 'map_code', 'size', 'color', 'costumer_name', 'kind']:
                     return Response({'status': f'key {item} is wrong'}, status=status.HTTP_400_BAD_REQUEST)
             seria = CarpetDetailSerializer(data=request.data)
             if seria.is_valid():
@@ -102,7 +102,7 @@ class CarpetFromExcel(APIView):
                 size = seria.data.get('size')
                 color = seria.data.get('color')
                 costumer_name = seria.data.get('costumer_name')
-                kind=seria.data.get('kind')
+                kind = seria.data.get('kind')
             else:
                 return Response({'status': 'bad request serializer not valid'}, status=status.HTTP_400_BAD_REQUEST)
             carpet_new = Carpet()
@@ -179,9 +179,9 @@ class ServiceproviderCreate(APIView):
             service_p.national_code = request.data['national_code']
             service_p.save()
             if len(request.data['services']) > 0:
-            #if len(json.loads(request.data['services'])) > 0:
+                # if len(json.loads(request.data['services'])) > 0:
                 list_services = request.data['services']
-                #list_services = json.loads(request.data['services'])
+                # list_services = json.loads(request.data['services'])
                 for services_item in list_services:
                     service = Service.objects.get(id=services_item)
                     service_p.services.add(service)
@@ -194,7 +194,7 @@ class ServiceproviderCreate(APIView):
 
 class DriverList(ListAPIView):
     queryset = Driver.objects.all()
-    serializer_class = DriverListSerializer
+    serializer_class = DriverListSerializer1
 
 
 class DriverCreate(CreateAPIView):
@@ -434,17 +434,20 @@ class TransferAdminVerify(ListAPIView):
     serializer_class = AdminVerifyTransferSerializer
     queryset = Transfer.objects.filter(admin_verify=False)
 
+
 class WorkerTransfer(ListAPIView):
     serializer_class = WorkerTransferSerializer
-    
+
     def get_queryset(self):
 
         user = self.request.user
         queryset = Transfer.objects.filter(worker=user, is_finished=False)
         return queryset
 
+
 class UserUpdatePatch(APIView):
     serializer_class = UserUpdatePatchSerializer
+
     def patch(self, request, pk, *args, **kwargs):
         try:
             user = User.objects.get(pk=pk)
@@ -452,107 +455,138 @@ class UserUpdatePatch(APIView):
             return Response({"detail": "User not found"}, status=status.HTTP_404_NOT_FOUND)
         # if request.user != user:
         #     return Response({"detail": "You do not have permission to update this user"}, status=status.HTTP_403_FORBIDDEN)
-        serializer = self.serializer_class(user, data=request.data, partial=True)
+        serializer = self.serializer_class(
+            user, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_200_OK)
 
+
 class StatusUpdatePatch(APIView):
     serializer_class = StatusUpdatePatchSerializer
+
     def patch(self, request, pk, *args, **kwargs):
         try:
             status_obj = Status.objects.get(pk=pk)
         except Status.DoesNotExist:
             return Response({"detail": "Status not found"}, status=status.HTTP_404_NOT_FOUND)
 
-        serializer = self.serializer_class(status_obj, data=request.data, partial=True)
+        serializer = self.serializer_class(
+            status_obj, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_200_OK)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+
 class ServiceUpdatePatch(APIView):
     serializer_class = ServiceUpdatePatchSerializer
+
     def patch(self, request, pk, *args, **kwargs):
         try:
             service_obj = Service.objects.get(pk=pk)
         except Service.DoesNotExist:
             return Response({"detail": "Service not found"}, status=status.HTTP_404_NOT_FOUND)
 
-        serializer = self.serializer_class(service_obj, data=request.data, partial=True)
+        serializer = self.serializer_class(
+            service_obj, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_200_OK)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+
 class ServiceProviderUpdatePatch(APIView):
     serializer_class = ServiceProviderUpdatePatchSerializer
+
     def patch(self, request, pk, *args, **kwargs):
         try:
             service_provider_obj = ServiceProviders.objects.get(pk=pk)
         except ServiceProviders.DoesNotExist:
             return Response({"detail": "Service Provider not found"}, status=status.HTTP_404_NOT_FOUND)
 
-        serializer = self.serializer_class(service_provider_obj, data=request.data, partial=True)
+        serializer = self.serializer_class(
+            service_provider_obj, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_200_OK)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+
 class DriverUpdatePatch(APIView):
     serializer_class = DriverUpdatePatchSerializer
+
     def patch(self, request, pk, *args, **kwargs):
         try:
             driver_obj = Driver.objects.get(pk=pk)
         except Driver.DoesNotExist:
             return Response({"detail": "Driver not found"}, status=status.HTTP_404_NOT_FOUND)
-        
-        serializer = self.serializer_class(driver_obj, data=request.data, partial=True)
+
+        serializer = self.serializer_class(
+            driver_obj, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_200_OK)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+
 class CarpetUpdatePatch(APIView):
     serializer_class = CarpetUpdatePatchSerializer
+
     def patch(self, request, pk, *args, **kwargs):
         try:
             carpet_obj = Carpet.objects.get(pk=pk)
         except Carpet.DoesNotExist:
             return Response({"detail": "Carpet not found"}, status=status.HTTP_404_NOT_FOUND)
 
-        serializer = self.serializer_class(carpet_obj, data=request.data, partial=True)
+        serializer = self.serializer_class(
+            carpet_obj, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_200_OK)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    
+
 
 class StatisticsList(ListAPIView):
     queryset = Statistics.objects.all()
     serializer_class = StatisticsListSerializer
 
+
 class StatisticsCreate(CreateAPIView):
     queryset = Statistics.objects.all()
     serializer_class = StatisticsCreateSerializer
 
+
 class StatisticsUpdate(APIView):
     serializer_class = StatisticsUpdateSerializer
-    
+
     def patch(self, request, pk, *args, **kwargs):
         try:
             statistics_obj = Statistics.objects.get(pk=pk)
         except Statistics.DoesNotExist:
             return Response({"detail": "Statistics record not found"}, status=status.HTTP_404_NOT_FOUND)
 
-        serializer = self.serializer_class(statistics_obj, data=request.data, partial=True)
+        serializer = self.serializer_class(
+            statistics_obj, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_200_OK)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class CarpetListSize(APIView):
+    def get(self, request, *args, **kwargs):
+        sizes = list(Carpet.objects.values_list('size', flat=True).distinct())
+        return Response(sizes)
+
+
+class CarpetListKind(APIView):
+    def get(self, request, *args, **kwargs):
+        kinds = list(Carpet.objects.values_list('kind', flat=True).distinct())
+        return Response(kinds)

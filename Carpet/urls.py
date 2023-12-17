@@ -24,6 +24,8 @@ urlpatterns = [
     path('updatecarpet/', UpdateCarpet.as_view(), name='updatecarpet'),
     path('carpet/delete-carpet/<int:pk>/', DestroyCarpet.as_view()),
     path('carpet/update-carpet/<int:pk>/', CarpetUpdatePatch.as_view()),
+    path('carpet/size-carpet-list/', CarpetListSize.as_view()),
+    path('carpet/kind-carpet-list/', CarpetListKind.as_view()),
     # serviceprovider url
     path('updateservice/', UpdateServiceProviders.as_view(), name='updateservice'),
     path('serviceprovider/all-serviceproviders-list/',
