@@ -627,9 +627,6 @@ class CarpetListWithTransfersAPIView(ListAPIView):
         data = []
         for carpet_data in serializer.data:
             carpet_id = carpet_data['id']
-            
-            # Filter Transfers based on carpet_id
-            transfers = Transfer.objects.filter(carpets__id=carpet_id)
 
             # Apply additional Transfer filters
             transfer_filters = {
@@ -641,8 +638,12 @@ class CarpetListWithTransfersAPIView(ListAPIView):
                 'admin_verify': self.request.query_params.get('admin_verify'),
             }
 
+            # Get Transfers based on carpet_id
+            transfers = Transfer.objects.filter(carpets__id=carpet_id)
+
+            # Apply additional Transfer filters if they are not None
             for field, value in transfer_filters.items():
-                if value:
+                if value is not None:
                     transfers = transfers.filter(**{field: value})
 
             transfer_serializer = TransferwithCarpetSerializer(transfers, many=True)
