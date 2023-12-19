@@ -590,3 +590,27 @@ class CarpetListKind(APIView):
     def get(self, request, *args, **kwargs):
         kinds = list(Carpet.objects.values_list('kind', flat=True).distinct())
         return Response(kinds)
+
+
+class CarpetListWithTransfersAPIView(ListAPIView):
+    serializer_class = CarpetwithTransferSerializer
+    pagination_class = CustomPagination 
+
+
+    def get_queryset(self):
+        return Carpet.objects.all()
+
+    def list(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
+        page = self.paginate_queryset(queryset) 
+        serializer = self.get_serializer(page, many=True)
+
+        data = []
+        for carpet_data in serializer.data:
+            carpet_id = carpet_data['id']
+            transfers = Transfer.objects.filter(carpets__id=carpet_id)
+            transfer_serializer = TransferwithCarpetSerializer(transfers, many=True)
+            carpet_data['transfers'] = transfer_serializer.data
+            data.append({'carpet': carpet_data})
+
+        return self.get_paginated_response(data)

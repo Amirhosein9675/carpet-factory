@@ -320,3 +320,59 @@ class StatisticsUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Statistics
         fields = "__all__"
+
+
+class CarpetwithTransferSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Carpet
+        fields = "__all__"
+
+
+class TransferwithCarpetSerializer(serializers.ModelSerializer):
+
+    def get_services(self, obj):
+        data = []
+        service_obj = {}
+        for service in obj.services.all():
+            service_obj = {}
+            service_obj['id'] = service.id
+            service_obj['title'] = service.title
+            data.append(service_obj)
+        return data
+
+    def get_service_provider(self, obj):
+        if obj.service_provider is not None:
+            data = []
+            service_provider_obj = {}
+            service_provider_obj['id'] = obj.service_provider.id
+            service_provider_obj['first_name'] = obj.service_provider.first_name
+            service_provider_obj['last_name'] = obj.service_provider.last_name
+            service_provider_obj['phone_number'] = obj.service_provider.phone_number
+            service_provider_obj['address'] = obj.service_provider.address
+            service_provider_obj['national_code'] = obj.service_provider.national_code
+            data.append(service_provider_obj)
+            return data
+        else:
+            return None
+    
+    def get_worker(self,obj):
+        if obj.worker is not None:
+            data = []
+            worker_obj = {}
+            worker_obj['id'] = obj.worker.id
+            worker_obj['first_name'] = obj.worker.first_name
+            worker_obj['last_name'] = obj.worker.last_name
+            data.append(worker_obj)
+            return data
+        else:
+            return None
+            
+
+    services = serializers.SerializerMethodField("get_services")
+    service_provider = serializers.SerializerMethodField("get_service_provider")
+    worker = serializers.SerializerMethodField("get_worker")
+
+    class Meta:
+        model = Transfer
+        fields = ['id', 'status','date','is_finished','admin_verify','service_provider','worker','services']
