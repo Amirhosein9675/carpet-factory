@@ -598,17 +598,53 @@ class CarpetListWithTransfersAPIView(ListAPIView):
 
 
     def get_queryset(self):
-        return Carpet.objects.all()
+        # Get query parameters for Carpet
+        carpet_filters = {
+            'factory': self.request.query_params.get('factory'),
+            'barcode': self.request.query_params.get('barcode'),
+            'map_code': self.request.query_params.get('map_code'),
+            'size': self.request.query_params.get('size'),
+            'color': self.request.query_params.get('color'),
+            'costumer_name': self.request.query_params.get('costumer_name'),
+            'kind': self.request.query_params.get('kind'),
+        }
+
+        # Start with all Carpets
+        queryset = Carpet.objects.all()
+
+        # Filter based on Carpet fields
+        for field, value in carpet_filters.items():
+            if value:
+                queryset = queryset.filter(**{field: value})
+
+        return queryset
 
     def list(self, request, *args, **kwargs):
         queryset = self.get_queryset()
-        page = self.paginate_queryset(queryset) 
+        page = self.paginate_queryset(queryset)
         serializer = self.get_serializer(page, many=True)
 
         data = []
         for carpet_data in serializer.data:
             carpet_id = carpet_data['id']
+            
+            # Filter Transfers based on carpet_id
             transfers = Transfer.objects.filter(carpets__id=carpet_id)
+
+            # Apply additional Transfer filters
+            transfer_filters = {
+                'status': self.request.query_params.get('status'),
+                'service_provider': self.request.query_params.get('service_provider'),
+                'worker': self.request.query_params.get('worker'),
+                'date': self.request.query_params.get('date'),
+                'is_finished': self.request.query_params.get('is_finished'),
+                'admin_verify': self.request.query_params.get('admin_verify'),
+            }
+
+            for field, value in transfer_filters.items():
+                if value:
+                    transfers = transfers.filter(**{field: value})
+
             transfer_serializer = TransferwithCarpetSerializer(transfers, many=True)
             carpet_data['transfers'] = transfer_serializer.data
             data.append({'carpet': carpet_data})
