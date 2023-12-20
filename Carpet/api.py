@@ -1,5 +1,4 @@
 from django.db.models import Q
-from django.db.models import Subquery
 from rest_framework.views import APIView
 from .models import *
 from rest_framework.response import Response
@@ -9,8 +8,7 @@ from .serializers import *
 import json
 from django.http import Http404
 from rest_framework import pagination
-from rest_framework.permissions import IsAuthenticated
-from rest_framework.authentication import TokenAuthentication
+from django.utils import timezone
 
 
 class CustomPagination(pagination.PageNumberPagination):
@@ -94,7 +92,7 @@ class CarpetFromExcel(APIView):
     def post(self, request, format=None):
         try:
             for item in list(request.data.keys()):
-                if item not in ['factory', 'barcode', 'map_code', 'size', 'color', 'costumer_name', 'kind']:
+                if item not in ['factory', 'barcode', 'map_code', 'size', 'color', 'costumer_name', 'kind', 'density']:
                     return Response({'status': f'key {item} is wrong'}, status=status.HTTP_400_BAD_REQUEST)
             seria = CarpetDetailSerializer(data=request.data)
             if seria.is_valid():
@@ -105,6 +103,7 @@ class CarpetFromExcel(APIView):
                 color = seria.data.get('color')
                 costumer_name = seria.data.get('costumer_name')
                 kind = seria.data.get('kind')
+                density = seria.data.get('density')
             else:
                 return Response({'status': 'bad request serializer not valid'}, status=status.HTTP_400_BAD_REQUEST)
             carpet_new = Carpet()
@@ -115,6 +114,7 @@ class CarpetFromExcel(APIView):
             carpet_new.color = color
             carpet_new.costumer_name = costumer_name
             carpet_new.kind = kind
+            carpet_new.density = density
             carpet_new.save()
 
             return Response({'status': 'carpet object saved successfully'}, status=status.HTTP_200_OK)
@@ -324,8 +324,9 @@ class TransferListAPIView(ListAPIView):
                 color=self.request.query_params.get('color', None),
                 costumer_name=self.request.query_params.get(
                     'costumer_name', None),
+                kind=self.request.query_params.get('kind', None),
+                density=self.request.query_params.get('density', None),
             )
-            print(carpet_ids)
             queryset = self.manager.filter_transfers(
                 status=status,
                 service_provider=service_provider,
@@ -593,12 +594,10 @@ class CarpetListKind(APIView):
         kinds = list(Carpet.objects.values_list('kind', flat=True).distinct())
         return Response(kinds)
 
-from django.db.models import Exists, OuterRef, Subquery
-from django.db.models import Count
+
 class CarpetListWithTransfersAPIView(ListAPIView):
     serializer_class = CarpetwithTransferSerializer
-    pagination_class = CustomPagination 
-
+    pagination_class = CustomPagination
 
     def get_queryset(self):
         carpet_filters = {
@@ -609,6 +608,7 @@ class CarpetListWithTransfersAPIView(ListAPIView):
             'color': self.request.query_params.get('color'),
             'costumer_name': self.request.query_params.get('costumer_name'),
             'kind': self.request.query_params.get('kind'),
+            'density': self.request.query_params.get('density'),
         }
 
         transfer_filters = {
@@ -625,11 +625,36 @@ class CarpetListWithTransfersAPIView(ListAPIView):
         for field, value in carpet_filters.items():
             if value:
                 queryset = queryset.filter(**{field: value})
-        transfer_subquery = Transfer.objects.filter(
-            carpets=OuterRef('pk'),
-            **{field: value for field, value in transfer_filters.items() if value is not None}
-        ).values('carpets__id')[:1]
-        queryset = queryset.annotate(has_matching_transfer=Exists(transfer_subquery))
-        queryset = queryset.filter(has_matching_transfer=True)
+
+        if any(transfer_filters.values()):
+            transfer_query = Q()
+            transfer_field_mapping = {
+                'status': 'status',
+                'service_provider': 'service_provider',
+                'worker': 'worker',
+                'is_finished': 'is_finished',
+                'admin_verify': 'admin_verify',
+                'date': 'date',
+            }
+
+            for field, value in transfer_filters.items():
+                if value is not None and field in transfer_field_mapping:
+                    if field == 'date':
+                        date_start = self.request.query_params.get(
+                            'start_date')
+                        date_end = self.request.query_params.get('end_date')
+
+                        if date_start and date_end:
+                            date_start = timezone.datetime.strptime(
+                                date_start, '%Y-%m-%d').replace(tzinfo=timezone.utc)
+                            date_end = timezone.datetime.strptime(
+                                date_end, '%Y-%m-%d').replace(tzinfo=timezone.utc)
+                            transfer_query |= Q(
+                                **{'transfers__{}__range'.format(transfer_field_mapping[field]): (date_start, date_end)})
+                    else:
+                        transfer_query |= Q(
+                            **{'transfers__{}'.format(transfer_field_mapping[field]): value})
+
+            queryset = queryset.filter(transfer_query)
 
         return queryset

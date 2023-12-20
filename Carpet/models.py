@@ -45,6 +45,7 @@ class Carpet(models.Model):
     color = models.CharField(max_length=128)
     costumer_name = models.CharField(max_length=256, null=True, blank=True)
     kind=models.CharField(max_length=256,null=True,blank=True)
+    density=models.CharField(max_length=256,null=True,blank=True)
 
     def __str__(self) -> str:
         return str(self.barcode)

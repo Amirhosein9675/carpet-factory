@@ -378,4 +378,4 @@ class CarpetwithTransferSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Carpet
-        fields = ['id','factory','barcode','map_code','size','color','costumer_name','kind', 'transfers']
+        fields = ['id','factory','barcode','map_code','size','color','costumer_name','kind','density','transfers']
