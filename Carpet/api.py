@@ -9,7 +9,7 @@ import json
 from django.http import Http404
 from rest_framework import pagination
 from django.utils import timezone
-
+from django.shortcuts import get_object_or_404
 
 class CustomPagination(pagination.PageNumberPagination):
     page_size = 10
@@ -658,3 +658,17 @@ class CarpetListWithTransfersAPIView(ListAPIView):
             queryset = queryset.filter(transfer_query)
 
         return queryset
+
+class LastTransferForCarpet(APIView):
+    def get(self, request, pk):
+        # Get the Carpet instance
+        carpet = get_object_or_404(Carpet, id=pk)
+
+        # Get the last transfer for the given carpet
+        last_transfer = Transfer.objects.filter(carpets=carpet).order_by('-date').first()
+
+        if last_transfer:
+            serializer = LastTransferSerializer(last_transfer)
+            return Response(serializer.data)
+        else:
+            return Response({"message": "No transfers found for the given carpet ID."}, status=404)
