@@ -1,3 +1,5 @@
+from django.db.models import Q
+from django.db.models import Subquery
 from rest_framework.views import APIView
 from .models import *
 from rest_framework.response import Response
@@ -591,14 +593,14 @@ class CarpetListKind(APIView):
         kinds = list(Carpet.objects.values_list('kind', flat=True).distinct())
         return Response(kinds)
 
-
+from django.db.models import Exists, OuterRef, Subquery
+from django.db.models import Count
 class CarpetListWithTransfersAPIView(ListAPIView):
     serializer_class = CarpetwithTransferSerializer
     pagination_class = CustomPagination 
 
 
     def get_queryset(self):
-        # Get query parameters for Carpet
         carpet_filters = {
             'factory': self.request.query_params.get('factory'),
             'barcode': self.request.query_params.get('barcode'),
@@ -609,45 +611,25 @@ class CarpetListWithTransfersAPIView(ListAPIView):
             'kind': self.request.query_params.get('kind'),
         }
 
-        # Start with all Carpets
+        transfer_filters = {
+            'status': self.request.query_params.get('status'),
+            'service_provider': self.request.query_params.get('service_provider'),
+            'worker': self.request.query_params.get('worker'),
+            'date': self.request.query_params.get('date'),
+            'is_finished': self.request.query_params.get('is_finished'),
+            'admin_verify': self.request.query_params.get('admin_verify'),
+        }
+
         queryset = Carpet.objects.all()
 
-        # Filter based on Carpet fields
         for field, value in carpet_filters.items():
             if value:
                 queryset = queryset.filter(**{field: value})
+        transfer_subquery = Transfer.objects.filter(
+            carpets=OuterRef('pk'),
+            **{field: value for field, value in transfer_filters.items() if value is not None}
+        ).values('carpets__id')[:1]
+        queryset = queryset.annotate(has_matching_transfer=Exists(transfer_subquery))
+        queryset = queryset.filter(has_matching_transfer=True)
 
         return queryset
-
-    def list(self, request, *args, **kwargs):
-        queryset = self.get_queryset()
-        page = self.paginate_queryset(queryset)
-        serializer = self.get_serializer(page, many=True)
-
-        data = []
-        for carpet_data in serializer.data:
-            carpet_id = carpet_data['id']
-
-            # Apply additional Transfer filters
-            transfer_filters = {
-                'status': self.request.query_params.get('status'),
-                'service_provider': self.request.query_params.get('service_provider'),
-                'worker': self.request.query_params.get('worker'),
-                'date': self.request.query_params.get('date'),
-                'is_finished': self.request.query_params.get('is_finished'),
-                'admin_verify': self.request.query_params.get('admin_verify'),
-            }
-
-            # Get Transfers based on carpet_id
-            transfers = Transfer.objects.filter(carpets__id=carpet_id)
-
-            # Apply additional Transfer filters if they are not None
-            for field, value in transfer_filters.items():
-                if value is not None:
-                    transfers = transfers.filter(**{field: value})
-
-            transfer_serializer = TransferwithCarpetSerializer(transfers, many=True)
-            carpet_data['transfers'] = transfer_serializer.data
-            data.append({'carpet': carpet_data})
-
-        return self.get_paginated_response(data)

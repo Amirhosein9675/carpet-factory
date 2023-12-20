@@ -322,13 +322,6 @@ class StatisticsUpdateSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 
-class CarpetwithTransferSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = Carpet
-        fields = "__all__"
-
-
 class TransferwithCarpetSerializer(serializers.ModelSerializer):
 
     def get_services(self, obj):
@@ -355,8 +348,8 @@ class TransferwithCarpetSerializer(serializers.ModelSerializer):
             return data
         else:
             return None
-    
-    def get_worker(self,obj):
+
+    def get_worker(self, obj):
         if obj.worker is not None:
             data = []
             worker_obj = {}
@@ -367,12 +360,22 @@ class TransferwithCarpetSerializer(serializers.ModelSerializer):
             return data
         else:
             return None
-            
 
     services = serializers.SerializerMethodField("get_services")
-    service_provider = serializers.SerializerMethodField("get_service_provider")
+    service_provider = serializers.SerializerMethodField(
+        "get_service_provider")
     worker = serializers.SerializerMethodField("get_worker")
 
     class Meta:
         model = Transfer
-        fields = ['id', 'status','date','is_finished','admin_verify','service_provider','worker','services']
+        fields = ['id', 'status', 'date', 'is_finished',
+                  'admin_verify', 'service_provider', 'worker', 'services']
+
+
+class CarpetwithTransferSerializer(serializers.ModelSerializer):
+
+    transfers = TransferwithCarpetSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = Carpet
+        fields = ['id','factory','barcode','map_code','size','color','costumer_name','kind', 'transfers']
