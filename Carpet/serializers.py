@@ -433,12 +433,21 @@ class LastTransferSerializer(serializers.ModelSerializer):
             carpet_obj['density'] = carpet.density
             data.append(carpet_obj)
         return data
-    
+    def get_status(self,obj):
+        if obj.status is not None:
+            data = []
+            status_obj = {}
+            status_obj['id'] = obj.status.id
+            status_obj['title'] = obj.status.title
+            data.append(status_obj)
+            return data
+        else:
+            return None
     carpets = serializers.SerializerMethodField("get_carpets")
     worker = serializers.SerializerMethodField("get_worker") 
     services = serializers.SerializerMethodField("get_services")
     service_provider = serializers.SerializerMethodField("get_service_provider")
-    
+    status=serializers.SerializerMethodField("get_status")
     
     class Meta:
         model = Transfer

@@ -672,3 +672,20 @@ class LastTransferForCarpet(APIView):
             return Response(serializer.data)
         else:
             return Response({"message": "No transfers found for the given carpet ID."}, status=404)
+
+
+# class CarpetTransferTest(ListAPIView):
+#     serializer_class = CarpetwithTransferSerializer
+#     pagination_class = CustomPagination 
+    
+#     def get_queryset(self):
+#         carpet_filters = {
+#             'factory': self.request.query_params.get('factory'),
+#             'barcode': self.request.query_params.get('barcode'),
+#             'map_code': self.request.query_params.get('map_code'),
+#             'size': self.request.query_params.get('size'),
+#             'color': self.request.query_params.get('color'),
+#             'costumer_name': self.request.query_params.get('costumer_name'),
+#             'kind': self.request.query_params.get('kind'),
+#         }
+        
