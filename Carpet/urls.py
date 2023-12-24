@@ -29,6 +29,7 @@ urlpatterns = [
     path('carpet/carpet-with-transfers/', CarpetListWithTransfersAPIView.as_view()),
     path('carpet/last-transfers/<int:pk>/', LastTransferForCarpet.as_view()),
     path('carpet/carpet-with-transfers2/', CarpetTransferTest.as_view()),
+    path('carpet/exit-to-service/', LastTransferCarpetWithFiter.as_view()),
     
     # serviceprovider url
     path('updateservice/', UpdateServiceProviders.as_view(), name='updateservice'),

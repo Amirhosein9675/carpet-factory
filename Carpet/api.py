@@ -663,10 +663,9 @@ class CarpetListWithTransfersAPIView(ListAPIView):
 
 class LastTransferForCarpet(APIView):
     def get(self, request, pk):
-        # Get the Carpet instance
+
         carpet = get_object_or_404(Carpet, id=pk)
 
-        # Get the last transfer for the given carpet
         last_transfer = Transfer.objects.filter(
             carpets=carpet).order_by('-date').first()
 
@@ -702,32 +701,72 @@ class CarpetTransferTest(ListAPIView):
         queryset = self.get_queryset()
         page = self.paginate_queryset(queryset)
         serializer = self.get_serializer(page, many=True)
-        print(80*'-')
-        print(queryset)
-        print(page)
-        # print(80*'=')
-        # print(serializer.data)
-        print(80*'=')
         data = []
         for carpet_data in serializer.data:
-            carpet_id=carpet_data['id']
+            carpet_id = carpet_data['id']
             transfers = Transfer.objects.filter(carpets__id=carpet_id)
             transfer_filters = {
-                    'status': self.request.query_params.get('status'),
-                    'services':self.request.query_params.get('services'),
-                    'service_provider': self.request.query_params.get('service_provider'),
-                    'worker': self.request.query_params.get('worker'),
-                    'date__gte':self.request.query_params.get('start_date'),
-                    'date__lte':self.request.query_params.get('end_date'),
-                    'is_finished': self.request.query_params.get('is_finished'),
-                    'admin_verify': self.request.query_params.get('admin_verify'),
-                }
-            for field,value in transfer_filters.items():
+                'status': self.request.query_params.get('status'),
+                'services': self.request.query_params.get('services'),
+                'service_provider': self.request.query_params.get('service_provider'),
+                'worker': self.request.query_params.get('worker'),
+                'date__gte': self.request.query_params.get('start_date'),
+                'date__lte': self.request.query_params.get('end_date'),
+                'is_finished': self.request.query_params.get('is_finished'),
+                'admin_verify': self.request.query_params.get('admin_verify'),
+            }
+            for field, value in transfer_filters.items():
                 if value is not None:
-                    transfers=transfers.filter(**{field:value})
-            transfer_serializer = TransferwithCarpetSerializer(transfers, many=True)
+                    transfers = transfers.filter(**{field: value})
+            transfer_serializer = TransferwithCarpetSerializer(
+                transfers, many=True)
             carpet_data['transfers'] = transfer_serializer.data
             data.append(carpet_data)
-        print(data)
-        # return super().list(request, *args, **kwargs)
-        return self.get_paginated_response(data)
+        filtered_carpets = [carpet for carpet in data if carpet["transfers"]]
+        print(filtered_carpets)
+        page = self.paginate_queryset(filtered_carpets)
+        return self.get_paginated_response(filtered_carpets)
+
+
+class LastTransferCarpetWithFiter(ListAPIView):
+    serializer_class = CarpetwithTransferSerializer
+    pagination_class = CustomPagination
+
+    def get_queryset(self):
+        querry = Carpet.objects.all()
+        carpet_filters = {
+            'factory': self.request.query_params.get('factory', None),
+            'barcode': self.request.query_params.get('barcode', None),
+            'map_code': self.request.query_params.get('map_code', None),
+            'size': self.request.query_params.get('size', None),
+            'color': self.request.query_params.get('color', None),
+            'costumer_name': self.request.query_params.get('costumer_name', None),
+            'kind': self.request.query_params.get('kind', None),
+            'density': self.request.query_params.get('density', None),
+        }
+        for field, value in carpet_filters.items():
+            if value is not None:
+                querry = querry.filter(**{field: value})
+        return querry
+
+    def list(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
+        page = self.paginate_queryset(queryset)
+        serializer = self.get_serializer(page, many=True)
+        data = []
+        for carpet_data in serializer.data:
+            carpet_id = carpet_data['id']
+            transfers = Transfer.objects.filter(carpets__id=carpet_id)
+            transfer = transfers.filter(
+                status__title='خروج به سرویس').order_by('-date').first()
+            transfer_serializer = TransferwithCarpetSerializer(transfer)
+            carpet_data['transfers'] = transfer_serializer.data
+            data.append(carpet_data)
+        filtered_carpets = []
+        for carpet in data:
+            print(carpet['transfers']['status'])
+            if carpet['transfers']['status'] is not None:
+                carpet.pop('transfers')
+                filtered_carpets.append(carpet)
+        page = self.paginate_queryset(filtered_carpets)
+        return self.get_paginated_response(filtered_carpets)

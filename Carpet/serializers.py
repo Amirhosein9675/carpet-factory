@@ -378,7 +378,9 @@ class CarpetwithTransferSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Carpet
-        fields = ['id','factory','barcode','map_code','size','color','costumer_name','kind','density','transfers']
+        fields = ['id', 'factory', 'barcode', 'map_code', 'size',
+                  'color', 'costumer_name', 'kind', 'density', 'transfers']
+
 
 class LastTransferSerializer(serializers.ModelSerializer):
     def get_services(self, obj):
@@ -390,7 +392,7 @@ class LastTransferSerializer(serializers.ModelSerializer):
             service_obj['title'] = service.title
             data.append(service_obj)
         return data
-    
+
     def get_service_provider(self, obj):
         if obj.service_provider is not None:
             data = []
@@ -405,7 +407,7 @@ class LastTransferSerializer(serializers.ModelSerializer):
             return data
         else:
             return None
-        
+
     def get_worker(self, obj):
         if obj.worker is not None:
             data = []
@@ -417,7 +419,8 @@ class LastTransferSerializer(serializers.ModelSerializer):
             return data
         else:
             return None
-    def get_carpets(self,obj):
+
+    def get_carpets(self, obj):
         data = []
         carpet_obj = {}
         for carpet in obj.carpets.all():
@@ -433,7 +436,8 @@ class LastTransferSerializer(serializers.ModelSerializer):
             carpet_obj['density'] = carpet.density
             data.append(carpet_obj)
         return data
-    def get_status(self,obj):
+
+    def get_status(self, obj):
         if obj.status is not None:
             data = []
             status_obj = {}
@@ -444,11 +448,12 @@ class LastTransferSerializer(serializers.ModelSerializer):
         else:
             return None
     carpets = serializers.SerializerMethodField("get_carpets")
-    worker = serializers.SerializerMethodField("get_worker") 
+    worker = serializers.SerializerMethodField("get_worker")
     services = serializers.SerializerMethodField("get_services")
-    service_provider = serializers.SerializerMethodField("get_service_provider")
-    status=serializers.SerializerMethodField("get_status")
-    
+    service_provider = serializers.SerializerMethodField(
+        "get_service_provider")
+    status = serializers.SerializerMethodField("get_status")
+
     class Meta:
         model = Transfer
         fields = "__all__"
