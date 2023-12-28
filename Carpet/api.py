@@ -656,7 +656,7 @@ class CarpetListWithTransfersAPIView(ListAPIView):
                         transfer_query |= Q(
                             **{'transfers__{}'.format(transfer_field_mapping[field]): value})
 
-            queryset = queryset.filter(transfer_query)
+            queryset = queryset.filter(transfer_query).distinct()
 
         return queryset
 
