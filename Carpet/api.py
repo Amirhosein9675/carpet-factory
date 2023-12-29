@@ -345,7 +345,7 @@ class TransferListAPIView(ListAPIView):
 
 class DestroyTransfer(DestroyAPIView):
     queryset = Transfer.objects.all()
-    serializer_class = TransferSerializer
+    serializer_class = DestroyTransferSerializer
 
     def destroy(self, request, *args, **kwargs):
         try:
