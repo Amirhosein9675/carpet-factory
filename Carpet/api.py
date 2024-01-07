@@ -10,6 +10,7 @@ from django.http import Http404
 from rest_framework import pagination
 from django.utils import timezone
 from django.shortcuts import get_object_or_404
+from rest_framework.viewsets import ModelViewSet
 
 
 class CustomPagination(pagination.PageNumberPagination):
@@ -676,70 +677,77 @@ class LastTransferForCarpet(APIView):
             return Response({"message": "No transfers found for the given carpet ID."}, status=404)
 
 
-class CarpetTransferTest(ListAPIView):
-    serializer_class = CarpetwithTransferSerializer
-    pagination_class = CustomPagination
+class CarpetTransferFinal(ModelViewSet):
+     serializer_class = CarpetTransferFinalFilter
+     pagination_class = CustomPagination
+     
+     def get_queryset(self):
+        queryset = Carpet.objects.exclude(transfers=None).exclude(transfers__isnull=True).distinct()
+        
+    
+        factory_filter = self.request.query_params.get('factory', None)
+        barcode_filter = self.request.query_params.get('barcode', None)
+        size_filter = self.request.query_params.get('size', None)
+        map_code_filter = self.request.query_params.get('map_code', None)
+        color_filter = self.request.query_params.get('color', None)
+        costumer_name_filter = self.request.query_params.get(
+            'costumer_name', None)
+        kind_filter = self.request.query_params.get('kind', None)
+        density_filter = self.request.query_params.get('density', None)
 
-    def get_queryset(self):
-        queryset = Carpet.objects.all()
-        carpet_filters = {
-            'factory': self.request.query_params.get('factory'),
-            'barcode': self.request.query_params.get('barcode'),
-            'map_code': self.request.query_params.get('map_code'),
-            'size': self.request.query_params.get('size'),
-            'color': self.request.query_params.get('color'),
-            'costumer_name': self.request.query_params.get('costumer_name'),
-            'kind': self.request.query_params.get('kind'),
-            'density': self.request.query_params.get('density'),
-        }
-
-        for field, value in carpet_filters.items():
-            if value is not None:
-                queryset = queryset.filter(**{field: value})
+        if factory_filter:
+            queryset = queryset.filter(factory=factory_filter)
+        if barcode_filter:
+            queryset = queryset.filter(barcode=barcode_filter)
+        if size_filter:
+            queryset = queryset.filter(size=size_filter)
+        if map_code_filter:
+            queryset = queryset.filter(map_code=map_code_filter)
+        if color_filter:
+            queryset = queryset.filter(color=color_filter)
+        if costumer_name_filter:
+            queryset = queryset.filter(costumer_name=costumer_name_filter)
+        if kind_filter:
+            queryset = queryset.filter(kind=kind_filter)
+        if density_filter:
+            queryset = queryset.filter(density=density_filter)
+        
+        status_filter = self.request.query_params.get('status')
+        service_provider_filter = self.request.query_params.get('service_provider')
+        services_filter = self.request.query_params.get('services')
+        worker_filter = self.request.query_params.get('worker')
+        date_filter = self.request.query_params.get('date')
+        is_finished_filter = self.request.query_params.get('is_finished')
+        admin_verify_filter = self.request.query_params.get('admin_verify')
+        
+        if status_filter:
+            queryset = queryset.filter(transfers__status=status_filter)
+        if service_provider_filter:
+            queryset = queryset.filter(transfers__service_provider=service_provider_filter)
+        if services_filter:
+            queryset = queryset.filter(transfers__services=services_filter)
+        if worker_filter:
+            queryset = queryset.filter(transfers__worker=worker_filter)
+        if is_finished_filter:
+            queryset = queryset.filter(transfers__is_finished=is_finished_filter)
+        if admin_verify_filter:
+            queryset = queryset.filter(transfers__admin_verify=admin_verify_filter)
+            
+        date__gte = self.request.query_params.get('date__gte')
+        date__lte = self.request.query_params.get('date__lte')
+        if date__gte and date__lte:
+        
+            date__gte = datetime.strptime(date__gte, '%Y-%m-%d')
+            date__lte = datetime.strptime(date__lte, '%Y-%m-%d')
+            
+            queryset = queryset.filter(
+                transfers__date__gte=date__gte,
+                transfers__date__lte=date__lte
+            )
+        queryset = queryset.exclude(transfers=None).exclude(transfers__isnull=True)
 
         return queryset
-
-    def list(self, request, *args, **kwargs):
-        queryset = self.get_queryset()
-        queryset = self.paginate_queryset(queryset)
-
-        filter_carpet = []
-        for carpet in queryset:
-            transfers = Transfer.objects.filter(carpets__id=carpet.id)
-            transfer_filters = {
-                'status': self.request.query_params.get('status'),
-                'services': self.request.query_params.get('services'),
-                'service_provider': self.request.query_params.get('service_provider'),
-                'worker': self.request.query_params.get('worker'),
-                'date__gte': self.request.query_params.get('start_date'),
-                'date__lte': self.request.query_params.get('end_date'),
-                'is_finished': self.request.query_params.get('is_finished'),
-                'admin_verify': self.request.query_params.get('admin_verify'),
-            }
-
-            for field, value in transfer_filters.items():
-                if value is not None:
-                    transfers = transfers.filter(**{field: value})
-
-            transfer_serializer = TransferwithCarpetSerializer(
-                transfers, many=True)
-            carpet_data = {
-                'id': carpet.id,
-                'factory': carpet.factory,
-                'barcode': carpet.barcode,
-                'map_code': carpet.map_code,
-                'size': carpet.size,
-                'color': carpet.color,
-                'costumer_name': carpet.costumer_name,
-                'kind': carpet.kind,
-                'density': carpet.density,
-                'transfers': transfer_serializer.data,
-            }
-            if carpet_data['transfers']:
-                filter_carpet.append(carpet_data)
-
-        serializer = self.get_serializer(filter_carpet, many=True)
-        return self.get_paginated_response(serializer.data)
+    
     
 
 
@@ -773,13 +781,16 @@ class LastTransferCarpetWithFiter(ListAPIView):
                 transfer_serializer = TransferwithCarpetSerializer(transfer)
                 carpet_data['transfers'] = transfer_serializer.data
                 data.append(carpet_data)
-            filtered_carpets = []
-            for carpet in data:
-                transfers_dict = dict(carpet['transfers'])
-                carpet_dict = dict(carpet)
-                if transfers_dict['status'] is not None:
-                    carpet_dict.pop('transfers')
-                    filtered_carpets.append(carpet_dict)
+        for carpet_trans in data:
+            print(80*'-')
+            carpet_trans['transfers']
+        filtered_carpets = []
+        for carpet in data:
+            transfers_dict = dict(carpet['transfers'])
+            carpet_dict = dict(carpet)
+            if transfers_dict['status'] is not None:
+                carpet_dict.pop('transfers')
+                filtered_carpets.append(carpet_dict)
         return filtered_carpets
 
 

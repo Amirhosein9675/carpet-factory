@@ -1,7 +1,12 @@
-from django.urls import path
+from django.urls import path,include
 from .api import *
 from .views import CustomUserDetailsView
+from rest_framework import routers
+
+router = routers.SimpleRouter()
+router.register(r'filter-carpet-transfer', CarpetTransferFinal, basename='filter-carpet-transfer')
 urlpatterns = [
+     path("", include(router.urls)),
     # register url
     path('register/', RegisterUser.as_view(), name=''),
     # user urls
@@ -28,7 +33,7 @@ urlpatterns = [
     path('carpet/kind-carpet-list/', CarpetListKind.as_view()),
     path('carpet/carpet-with-transfers/', CarpetListWithTransfersAPIView.as_view()),
     path('carpet/last-transfers/<int:pk>/', LastTransferForCarpet.as_view()),
-    path('carpet/carpet-with-transfers2/', CarpetTransferTest.as_view()),
+    #path('carpet/carpet-with-transfers2/', CarpetTransferTest.as_view()),
     path('carpet/exit-to-service/', LastTransferCarpetWithFiter.as_view()),
     path('carpet/enter-from-factory/', LastTransferCarpetEnterFactory.as_view()),
     
