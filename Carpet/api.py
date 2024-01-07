@@ -826,20 +826,13 @@ class CarpetLastTransferExiteService(ModelViewSet):
         if transfer_admin_verify_filter is not None:
             queryset = queryset.filter(transfers__id=F(
                 'last_exit_transfer_id'), transfers__admin_verify=bool(transfer_admin_verify_filter))
-
-        if transfer_date_gte_filter or transfer_date_lte_filter:
-            last_exit_transfer_date_subquery = Transfer.objects.filter(
-                carpets=OuterRef('id'), status__title='خروج به سرویس'
-            ).order_by('-date').values('date')[:1]
-            queryset = queryset.annotate(
-                last_exit_transfer_date=Subquery(last_exit_transfer_date_subquery))
-            if transfer_date_gte_filter:
-                queryset = queryset.filter(Q(transfers__date__gte=transfer_date_gte_filter) | Q(
-                    last_exit_transfer_date__gte=transfer_date_gte_filter))
-            if transfer_date_lte_filter:
-                queryset = queryset.filter(Q(transfers__date__lte=transfer_date_lte_filter) | Q(
-                    last_exit_transfer_date__lte=transfer_date_lte_filter))
+        
+        if transfer_date_gte_filter and transfer_date_lte_filter:
+             queryset = queryset.filter(transfers__id=F(
+                'last_exit_transfer_id'), transfers__date__range=(transfer_date_gte_filter,transfer_date_lte_filter))
+        
         return queryset
+    
     def get_serializer(self, *args, **kwargs):
         exclude_transfers = self.request.query_params.get('exclude_transfers', None)
         kwargs['context'] = {'exclude_transfers': exclude_transfers == 'true'}
@@ -929,19 +922,12 @@ class CarpetLastTransferEnterFactory(ModelViewSet):
             queryset = queryset.filter(transfers__id=F(
                 'last_exit_transfer_id'), transfers__admin_verify=bool(transfer_admin_verify_filter))
 
-        if transfer_date_gte_filter or transfer_date_lte_filter:
-            last_exit_transfer_date_subquery = Transfer.objects.filter(
-                carpets=OuterRef('id'), status__title='ورود از کارخانه'
-            ).order_by('-date').values('date')[:1]
-            queryset = queryset.annotate(
-                last_exit_transfer_date=Subquery(last_exit_transfer_date_subquery))
-            if transfer_date_gte_filter:
-                queryset = queryset.filter(Q(transfers__date__gte=transfer_date_gte_filter) | Q(
-                    last_exit_transfer_date__gte=transfer_date_gte_filter))
-            if transfer_date_lte_filter:
-                queryset = queryset.filter(Q(transfers__date__lte=transfer_date_lte_filter) | Q(
-                    last_exit_transfer_date__lte=transfer_date_lte_filter))
+        if transfer_date_gte_filter and transfer_date_lte_filter:
+             queryset = queryset.filter(transfers__id=F(
+                'last_exit_transfer_id'), transfers__date__range=(transfer_date_gte_filter,transfer_date_lte_filter))
+             
         return queryset
+    
     def get_serializer(self, *args, **kwargs):
         exclude_transfers = self.request.query_params.get('exclude_transfers', None)
         kwargs['context'] = {'exclude_transfers': exclude_transfers == 'true'}
