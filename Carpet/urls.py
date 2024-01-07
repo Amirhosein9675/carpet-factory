@@ -5,6 +5,9 @@ from rest_framework import routers
 
 router = routers.SimpleRouter()
 router.register(r'filter-carpet-transfer', CarpetTransferFinal, basename='filter-carpet-transfer')
+router.register(r'filter-carpet-transfer-exitservice', CarpetLastTransferExiteService, basename='filter-carpet-transfer-exitservice')
+router.register(r'filter-carpet-transfer-enterfactory', CarpetLastTransferEnterFactory, basename='filter-carpet-transfer-enterfactory')
+
 urlpatterns = [
      path("", include(router.urls)),
     # register url
@@ -33,9 +36,6 @@ urlpatterns = [
     path('carpet/kind-carpet-list/', CarpetListKind.as_view()),
     path('carpet/carpet-with-transfers/', CarpetListWithTransfersAPIView.as_view()),
     path('carpet/last-transfers/<int:pk>/', LastTransferForCarpet.as_view()),
-    #path('carpet/carpet-with-transfers2/', CarpetTransferTest.as_view()),
-    path('carpet/exit-to-service/', LastTransferCarpetWithFiter.as_view()),
-    path('carpet/enter-from-factory/', LastTransferCarpetEnterFactory.as_view()),
     
     # serviceprovider url
     path('updateservice/', UpdateServiceProviders.as_view(), name='updateservice'),

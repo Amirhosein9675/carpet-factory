@@ -466,6 +466,7 @@ class TransferCarpetFinalFilter(serializers.ModelSerializer):
         exclude = ['carpets']
 
 class CarpetTransferFinalFilter(serializers.ModelSerializer):
+    
     transfers = TransferCarpetFinalFilter(many=True, read_only=True)
 
     class Meta:
@@ -510,3 +511,53 @@ class CarpetTransferFinalFilter(serializers.ModelSerializer):
             )
 
         return queryset
+    
+class TransferwithCarpetForExitServiceSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Transfer
+        fields = ['id', 'status', 'date', 'is_finished',
+                  'admin_verify', 'service_provider', 'worker', 'services']
+
+class CarpetwithTransferForExitServiceSerializer(serializers.ModelSerializer):
+    transfers = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Carpet
+        fields = ['id', 'factory', 'barcode', 'map_code', 'size', 'color', 'costumer_name', 'kind', 'density', 'transfers']
+
+    def get_transfers(self, carpet):
+        if 'exclude_transfers' in self.context and self.context['exclude_transfers']:
+            return None
+        else:
+            last_exit_transfer = carpet.transfers.filter(status__title='خروج به سرویس').order_by('-date').first()
+
+            if last_exit_transfer:
+                return TransferwithCarpetSerializer(last_exit_transfer).data
+            else:
+                return None
+
+class TransferwithCarpetForEnterFactorySerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Transfer
+        fields = ['id', 'status', 'date', 'is_finished',
+                  'admin_verify', 'service_provider', 'worker', 'services']
+
+class CarpetwithTransferForEnterFactorySerializer(serializers.ModelSerializer):
+    transfers = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Carpet
+        fields = ['id', 'factory', 'barcode', 'map_code', 'size', 'color', 'costumer_name', 'kind', 'density', 'transfers']
+
+    def get_transfers(self, carpet):
+        if 'exclude_transfers' in self.context and self.context['exclude_transfers']:
+            return None
+        else:
+            last_exit_transfer = carpet.transfers.filter(status__title='ورود از کارخانه').order_by('-date').first()
+
+            if last_exit_transfer:
+                return TransferwithCarpetSerializer(last_exit_transfer).data
+            else:
+                return None        
