@@ -7,6 +7,7 @@ router = routers.SimpleRouter()
 router.register(r'filter-carpet-transfer', CarpetTransferFinal, basename='filter-carpet-transfer')
 router.register(r'filter-carpet-transfer-exitservice', CarpetLastTransferExiteService, basename='filter-carpet-transfer-exitservice')
 router.register(r'filter-carpet-transfer-enterfactory', CarpetLastTransferEnterFactory, basename='filter-carpet-transfer-enterfactory')
+router.register(r'statistics', StatisticsWithCrud, basename='statistics')
 
 urlpatterns = [
      path("", include(router.urls)),
@@ -34,7 +35,6 @@ urlpatterns = [
     path('carpet/update-carpet/<int:pk>/', CarpetUpdatePatch.as_view()),
     path('carpet/size-carpet-list/', CarpetListSize.as_view()),
     path('carpet/kind-carpet-list/', CarpetListKind.as_view()),
-    path('carpet/carpet-with-transfers/', CarpetListWithTransfersAPIView.as_view()),
     path('carpet/last-transfers/<int:pk>/', LastTransferForCarpet.as_view()),
     
     # serviceprovider url
@@ -67,9 +67,5 @@ urlpatterns = [
     path('transfer/admin-verify-transfer/', TransferAdminVerify.as_view()),
     path('transfer/worker-isfinished-transfer/', WorkerTransfer.as_view()),
 
-    # Statistics urls
-    path('statistics/all-statistics-list/', StatisticsList.as_view()),
-    path('statistics/create-statistics/', StatisticsCreate.as_view()),
-    path('statistics/update-statistics/<int:pk>/', StatisticsUpdate.as_view()),
 
 ]

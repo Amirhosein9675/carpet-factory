@@ -557,34 +557,6 @@ class CarpetUpdatePatch(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-class StatisticsList(ListAPIView):
-    queryset = Statistics.objects.all()
-    serializer_class = StatisticsListSerializer
-
-
-class StatisticsCreate(CreateAPIView):
-    queryset = Statistics.objects.all()
-    serializer_class = StatisticsCreateSerializer
-
-
-class StatisticsUpdate(APIView):
-    serializer_class = StatisticsUpdateSerializer
-
-    def patch(self, request, pk, *args, **kwargs):
-        try:
-            statistics_obj = Statistics.objects.get(pk=pk)
-        except Statistics.DoesNotExist:
-            return Response({"detail": "Statistics record not found"}, status=status.HTTP_404_NOT_FOUND)
-
-        serializer = self.serializer_class(
-            statistics_obj, data=request.data, partial=True)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_200_OK)
-
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
 class CarpetListSize(APIView):
     def get(self, request, *args, **kwargs):
         sizes = list(Carpet.objects.values_list('size', flat=True).distinct())
@@ -595,71 +567,6 @@ class CarpetListKind(APIView):
     def get(self, request, *args, **kwargs):
         kinds = list(Carpet.objects.values_list('kind', flat=True).distinct())
         return Response(kinds)
-
-
-class CarpetListWithTransfersAPIView(ListAPIView):
-    serializer_class = CarpetwithTransferSerializer
-    pagination_class = CustomPagination
-
-    def get_queryset(self):
-        carpet_filters = {
-            'factory': self.request.query_params.get('factory'),
-            'barcode': self.request.query_params.get('barcode'),
-            'map_code': self.request.query_params.get('map_code'),
-            'size': self.request.query_params.get('size'),
-            'color': self.request.query_params.get('color'),
-            'costumer_name': self.request.query_params.get('costumer_name'),
-            'kind': self.request.query_params.get('kind'),
-            'density': self.request.query_params.get('density'),
-        }
-
-        transfer_filters = {
-            'status': self.request.query_params.get('status'),
-            'service_provider': self.request.query_params.get('service_provider'),
-            'worker': self.request.query_params.get('worker'),
-            'date': self.request.query_params.get('date'),
-            'is_finished': self.request.query_params.get('is_finished'),
-            'admin_verify': self.request.query_params.get('admin_verify'),
-        }
-
-        queryset = Carpet.objects.all()
-
-        for field, value in carpet_filters.items():
-            if value:
-                queryset = queryset.filter(**{field: value})
-
-        if any(transfer_filters.values()):
-            transfer_query = Q()
-            transfer_field_mapping = {
-                'status': 'status',
-                'service_provider': 'service_provider',
-                'worker': 'worker',
-                'is_finished': 'is_finished',
-                'admin_verify': 'admin_verify',
-                'date': 'date',
-            }
-
-            for field, value in transfer_filters.items():
-                if value is not None and field in transfer_field_mapping:
-                    if field == 'date':
-                        date_start = self.request.query_params.get(
-                            'start_date')
-                        date_end = self.request.query_params.get('end_date')
-
-                        if date_start and date_end:
-                            date_start = timezone.datetime.strptime(
-                                date_start, '%Y-%m-%d').replace(tzinfo=timezone.utc)
-                            date_end = timezone.datetime.strptime(
-                                date_end, '%Y-%m-%d').replace(tzinfo=timezone.utc)
-                            transfer_query |= Q(
-                                **{'transfers__{}__range'.format(transfer_field_mapping[field]): (date_start, date_end)})
-                    else:
-                        transfer_query |= Q(
-                            **{'transfers__{}'.format(transfer_field_mapping[field]): value})
-
-            queryset = queryset.filter(transfer_query).distinct()
-
-        return queryset
 
 
 class LastTransferForCarpet(APIView):
@@ -749,8 +656,6 @@ class CarpetTransferFinal(ModelViewSet):
         return queryset
     
     
-
-
 class CarpetLastTransferExiteService(ModelViewSet):
     serializer_class = CarpetwithTransferForExitServiceSerializer
     pagination_class = CustomPagination
@@ -838,13 +743,13 @@ class CarpetLastTransferExiteService(ModelViewSet):
         kwargs['context'] = {'exclude_transfers': exclude_transfers == 'true'}
         return super().get_serializer(*args, **kwargs)
     
-    def finalize_response(self, request, response, *args, **kwargs):
-        response = super().finalize_response(request, response, *args, **kwargs)
-        if 'results' in response.data:
-            for item in response.data['results']:
-                if 'transfers' in item and item['transfers'] is not None:
-                    del item['transfers']
-        return response
+    # def finalize_response(self, request, response, *args, **kwargs):
+    #     response = super().finalize_response(request, response, *args, **kwargs)
+    #     if 'results' in response.data:
+    #         for item in response.data['results']:
+    #             if 'transfers' in item and item['transfers'] is not None:
+    #                 del item['transfers']
+    #     return response
 
 class CarpetLastTransferEnterFactory(ModelViewSet):
     serializer_class = CarpetwithTransferForEnterFactorySerializer
@@ -933,10 +838,14 @@ class CarpetLastTransferEnterFactory(ModelViewSet):
         kwargs['context'] = {'exclude_transfers': exclude_transfers == 'true'}
         return super().get_serializer(*args, **kwargs)
     
-    def finalize_response(self, request, response, *args, **kwargs):
-        response = super().finalize_response(request, response, *args, **kwargs)
-        if 'results' in response.data:
-            for item in response.data['results']:
-                if 'transfers' in item and item['transfers'] is not None:
-                    del item['transfers']
-        return response
+    # def finalize_response(self, request, response, *args, **kwargs):
+    #     response = super().finalize_response(request, response, *args, **kwargs)
+    #     if 'results' in response.data:
+    #         for item in response.data['results']:
+    #             if 'transfers' in item and item['transfers'] is not None:
+    #                 del item['transfers']
+    #     return response
+
+class StatisticsWithCrud(ModelViewSet):
+    queryset = Statistics.objects.all()
+    serializer_class = StatisticsWithCrudSerializer

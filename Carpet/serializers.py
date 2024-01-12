@@ -2,6 +2,7 @@ from rest_framework import serializers
 from .models import *
 from datetime import datetime
 
+
 class RegisterUserSerializer(serializers.Serializer):
 
     username = serializers.CharField(
@@ -300,28 +301,6 @@ class CarpetUpdatePatchSerializer(serializers.ModelSerializer):
         model = Carpet
         fields = "__all__"
 
-
-class StatisticsListSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = Statistics
-        fields = "__all__"
-
-
-class StatisticsCreateSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = Statistics
-        fields = "__all__"
-
-
-class StatisticsUpdateSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = Statistics
-        fields = "__all__"
-
-
 class TransferwithCarpetSerializer(serializers.ModelSerializer):
 
     def get_services(self, obj):
@@ -348,7 +327,7 @@ class TransferwithCarpetSerializer(serializers.ModelSerializer):
             return data
         else:
             return None
-        
+
     def get_worker(self, obj):
         if obj.worker is not None:
             data = []
@@ -460,20 +439,21 @@ class LastTransferSerializer(serializers.ModelSerializer):
 
 
 class TransferCarpetFinalFilter(serializers.ModelSerializer):
-    
+
     class Meta:
         model = Transfer
         exclude = ['carpets']
 
+
 class CarpetTransferFinalFilter(serializers.ModelSerializer):
-    
+
     transfers = TransferCarpetFinalFilter(many=True, read_only=True)
 
     class Meta:
         model = Carpet
-        fields = ['id', 'factory', 'barcode', 'map_code', 'size', 'color', 'costumer_name', 'kind', 'density', 'transfers']
-        
-        
+        fields = ['id', 'factory', 'barcode', 'map_code', 'size',
+                  'color', 'costumer_name', 'kind', 'density', 'transfers']
+
     def to_representation(self, instance):
         data = super().to_representation(instance)
         request = self.context.get('request')
@@ -487,17 +467,21 @@ class CarpetTransferFinalFilter(serializers.ModelSerializer):
             'is_finished': request.query_params.get('is_finished'),
             'admin_verify': request.query_params.get('admin_verify'),
         }
-        filtered_transfers = instance.transfers.filter(**{k: v for k, v in filter_params.items() if v is not None})
+        filtered_transfers = instance.transfers.filter(
+            **{k: v for k, v in filter_params.items() if v is not None})
         if filtered_transfers.exists():
-            transfer_serializer = TransferCarpetFinalFilter(filtered_transfers, many=True, context=self.context)
+            transfer_serializer = TransferCarpetFinalFilter(
+                filtered_transfers, many=True, context=self.context)
             return {'id': instance.id, 'factory': instance.factory, 'barcode': instance.barcode, 'map_code': instance.map_code,
                     'size': instance.size, 'color': instance.color, 'costumer_name': instance.costumer_name,
                     'kind': instance.kind, 'density': instance.density, 'transfers': transfer_serializer.data}
         else:
-            return {}  
+            return {}
+
     @staticmethod
     def get_queryset(self):
-        queryset = Carpet.objects.exclude(transfers=None).exclude(transfers__isnull=True).distinct()
+        queryset = Carpet.objects.exclude(transfers=None).exclude(
+            transfers__isnull=True).distinct()
 
         date__gte = self.request.query_params.get('date__gte')
         date__lte = self.request.query_params.get('date__lte')
@@ -511,7 +495,8 @@ class CarpetTransferFinalFilter(serializers.ModelSerializer):
             )
 
         return queryset
-    
+
+
 class TransferwithCarpetForExitServiceSerializer(serializers.ModelSerializer):
 
     class Meta:
@@ -519,23 +504,27 @@ class TransferwithCarpetForExitServiceSerializer(serializers.ModelSerializer):
         fields = ['id', 'status', 'date', 'is_finished',
                   'admin_verify', 'service_provider', 'worker', 'services']
 
+
 class CarpetwithTransferForExitServiceSerializer(serializers.ModelSerializer):
     transfers = serializers.SerializerMethodField()
 
     class Meta:
         model = Carpet
-        fields = ['id', 'factory', 'barcode', 'map_code', 'size', 'color', 'costumer_name', 'kind', 'density', 'transfers']
+        fields = ['id', 'factory', 'barcode', 'map_code', 'size',
+                  'color', 'costumer_name', 'kind', 'density', 'transfers']
 
     def get_transfers(self, carpet):
         if 'exclude_transfers' in self.context and self.context['exclude_transfers']:
             return None
         else:
-            last_exit_transfer = carpet.transfers.filter(status__title='خروج به سرویس').order_by('-date').first()
+            last_exit_transfer = carpet.transfers.filter(
+                status__title='خروج به سرویس').order_by('-date').first()
 
             if last_exit_transfer:
                 return TransferwithCarpetSerializer(last_exit_transfer).data
             else:
                 return None
+
 
 class TransferwithCarpetForEnterFactorySerializer(serializers.ModelSerializer):
 
@@ -544,20 +533,29 @@ class TransferwithCarpetForEnterFactorySerializer(serializers.ModelSerializer):
         fields = ['id', 'status', 'date', 'is_finished',
                   'admin_verify', 'service_provider', 'worker', 'services']
 
+
 class CarpetwithTransferForEnterFactorySerializer(serializers.ModelSerializer):
     transfers = serializers.SerializerMethodField()
 
     class Meta:
         model = Carpet
-        fields = ['id', 'factory', 'barcode', 'map_code', 'size', 'color', 'costumer_name', 'kind', 'density', 'transfers']
+        fields = ['id', 'factory', 'barcode', 'map_code', 'size',
+                  'color', 'costumer_name', 'kind', 'density', 'transfers']
 
     def get_transfers(self, carpet):
         if 'exclude_transfers' in self.context and self.context['exclude_transfers']:
             return None
         else:
-            last_exit_transfer = carpet.transfers.filter(status__title='ورود از کارخانه').order_by('-date').first()
+            last_exit_transfer = carpet.transfers.filter(
+                status__title='ورود از کارخانه').order_by('-date').first()
 
             if last_exit_transfer:
                 return TransferwithCarpetSerializer(last_exit_transfer).data
             else:
-                return None        
+                return None
+
+class StatisticsWithCrudSerializer(serializers.ModelSerializer):
+    
+    class Meta:
+        model = Statistics
+        fields = "__all__"
